@@ -18,7 +18,8 @@ public class MainWindow extends javax.swing.JFrame {
     public MainWindow() {
         initComponents();
         contentPanel.setLayout(new java.awt.BorderLayout());
-        //contentPanel.add(new Dashboard(), java.awt.BorderLayout.CENTER);
+        contentPanel.add(new Dashboard(), java.awt.BorderLayout.CENTER);
+        
         
     }
 
@@ -108,9 +109,9 @@ public class MainWindow extends javax.swing.JFrame {
             .addGroup(sidebarPanelLayout.createSequentialGroup()
                 .addGap(33, 33, 33)
                 .addComponent(lbMenu)
-                .addGap(53, 53, 53)
+                .addGap(63, 63, 63)
                 .addComponent(btnDashboard, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(28, 28, 28)
+                .addGap(18, 18, 18)
                 .addComponent(btnStock, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
                 .addComponent(btnSales, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -164,7 +165,11 @@ public class MainWindow extends javax.swing.JFrame {
     }//GEN-LAST:event_btnSalesActionPerformed
 
     private void btnOrdersActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnOrdersActionPerformed
-        // TODO add your handling code here:
+        System.out.println("Orders clicked");
+        contentPanel.removeAll();
+        contentPanel.add(new Orders(), java.awt.BorderLayout.CENTER);
+        contentPanel.revalidate();
+        contentPanel.repaint();
     }//GEN-LAST:event_btnOrdersActionPerformed
 
     private void btnLogoutActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnLogoutActionPerformed
