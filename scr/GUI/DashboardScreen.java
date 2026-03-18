@@ -42,16 +42,16 @@ public class DashboardScreen extends javax.swing.JFrame {
         btnLogout = new javax.swing.JButton();
         lbMenu = new javax.swing.JLabel();
         contentPanel = new javax.swing.JPanel();
-        lbTitle = new javax.swing.JLabel();
-        lbInfo1 = new javax.swing.JLabel();
-        stockPanel1 = new javax.swing.JPanel();
-        lbStock1 = new javax.swing.JLabel();
-        salesPanel2 = new javax.swing.JPanel();
-        lbSales2 = new javax.swing.JLabel();
         accountPanel3 = new javax.swing.JPanel();
         lbAccount3 = new javax.swing.JLabel();
         pendingPanel4 = new javax.swing.JPanel();
         lbPending4 = new javax.swing.JLabel();
+        salesPanel2 = new javax.swing.JPanel();
+        lbSales2 = new javax.swing.JLabel();
+        stockPanel1 = new javax.swing.JPanel();
+        lbStock1 = new javax.swing.JLabel();
+        lbTitle = new javax.swing.JLabel();
+        lbInfo1 = new javax.swing.JLabel();
         jMenuBar1 = new javax.swing.JMenuBar();
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
@@ -86,9 +86,9 @@ public class DashboardScreen extends javax.swing.JFrame {
 
         mainPanel.setBackground(new java.awt.Color(245, 245, 245));
 
-        sidebarPanel.setBackground(new java.awt.Color(0, 51, 102));
+        sidebarPanel.setBackground(new java.awt.Color(0, 0, 51));
 
-        btnDashboard.setBackground(new java.awt.Color(0, 51, 102));
+        btnDashboard.setBackground(new java.awt.Color(0, 0, 51));
         btnDashboard.setFont(new java.awt.Font("Helvetica Neue", 1, 13)); // NOI18N
         btnDashboard.setForeground(new java.awt.Color(255, 255, 255));
         btnDashboard.setText("Dashboard");
@@ -96,7 +96,7 @@ public class DashboardScreen extends javax.swing.JFrame {
         btnDashboard.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         btnDashboard.addActionListener(this::btnDashboardActionPerformed);
 
-        btnStock.setBackground(new java.awt.Color(0, 51, 102));
+        btnStock.setBackground(new java.awt.Color(0, 0, 51));
         btnStock.setFont(new java.awt.Font("Helvetica Neue", 1, 13)); // NOI18N
         btnStock.setForeground(new java.awt.Color(255, 255, 255));
         btnStock.setText("Stock");
@@ -104,7 +104,7 @@ public class DashboardScreen extends javax.swing.JFrame {
         btnStock.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         btnStock.addActionListener(this::btnStockActionPerformed);
 
-        btnSales.setBackground(new java.awt.Color(0, 51, 102));
+        btnSales.setBackground(new java.awt.Color(0, 0, 51));
         btnSales.setFont(new java.awt.Font("Helvetica Neue", 1, 13)); // NOI18N
         btnSales.setForeground(new java.awt.Color(255, 255, 255));
         btnSales.setText("Sales");
@@ -112,7 +112,7 @@ public class DashboardScreen extends javax.swing.JFrame {
         btnSales.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         btnSales.addActionListener(this::btnSalesActionPerformed);
 
-        btnOrders.setBackground(new java.awt.Color(0, 51, 102));
+        btnOrders.setBackground(new java.awt.Color(0, 0, 51));
         btnOrders.setFont(new java.awt.Font("Helvetica Neue", 1, 13)); // NOI18N
         btnOrders.setForeground(new java.awt.Color(255, 255, 255));
         btnOrders.setText("Orders");
@@ -128,7 +128,7 @@ public class DashboardScreen extends javax.swing.JFrame {
         btnLogout.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         btnLogout.addActionListener(this::btnLogoutActionPerformed);
 
-        lbMenu.setBackground(new java.awt.Color(0, 51, 102));
+        lbMenu.setBackground(new java.awt.Color(0, 0, 51));
         lbMenu.setFont(new java.awt.Font("Helvetica Neue", 1, 14)); // NOI18N
         lbMenu.setForeground(new java.awt.Color(255, 255, 255));
         lbMenu.setText("Pharmacy System");
@@ -162,63 +162,15 @@ public class DashboardScreen extends javax.swing.JFrame {
                 .addComponent(btnOrders, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(50, 50, 50)
                 .addComponent(btnLogout, javax.swing.GroupLayout.PREFERRED_SIZE, 31, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(644, Short.MAX_VALUE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         contentPanel.setBackground(new java.awt.Color(245, 245, 245));
         contentPanel.setCursor(new java.awt.Cursor(java.awt.Cursor.MOVE_CURSOR));
 
-        lbTitle.setFont(new java.awt.Font("Helvetica Neue", 1, 24)); // NOI18N
-        lbTitle.setText("Dashboard");
+        accountPanel3.setBackground(new java.awt.Color(204, 204, 255));
 
-        lbInfo1.setFont(new java.awt.Font("Helvetica Neue", 1, 13)); // NOI18N
-        lbInfo1.setForeground(new java.awt.Color(102, 102, 102));
-        lbInfo1.setText("Welcome to InfoPharma Ordering System");
-
-        stockPanel1.setBackground(new java.awt.Color(255, 255, 255));
-
-        lbStock1.setText("Total Stock Items");
-
-        javax.swing.GroupLayout stockPanel1Layout = new javax.swing.GroupLayout(stockPanel1);
-        stockPanel1.setLayout(stockPanel1Layout);
-        stockPanel1Layout.setHorizontalGroup(
-            stockPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(stockPanel1Layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(lbStock1)
-                .addContainerGap(134, Short.MAX_VALUE))
-        );
-        stockPanel1Layout.setVerticalGroup(
-            stockPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(stockPanel1Layout.createSequentialGroup()
-                .addGap(28, 28, 28)
-                .addComponent(lbStock1)
-                .addContainerGap(119, Short.MAX_VALUE))
-        );
-
-        salesPanel2.setBackground(new java.awt.Color(255, 255, 255));
-
-        lbSales2.setText("Today's Sales");
-
-        javax.swing.GroupLayout salesPanel2Layout = new javax.swing.GroupLayout(salesPanel2);
-        salesPanel2.setLayout(salesPanel2Layout);
-        salesPanel2Layout.setHorizontalGroup(
-            salesPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(salesPanel2Layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(lbSales2)
-                .addContainerGap(152, Short.MAX_VALUE))
-        );
-        salesPanel2Layout.setVerticalGroup(
-            salesPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(salesPanel2Layout.createSequentialGroup()
-                .addGap(24, 24, 24)
-                .addComponent(lbSales2)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-        );
-
-        accountPanel3.setBackground(new java.awt.Color(255, 255, 255));
-
+        lbAccount3.setFont(new java.awt.Font("Helvetica Neue", 1, 24)); // NOI18N
         lbAccount3.setText("Active Customers");
 
         javax.swing.GroupLayout accountPanel3Layout = new javax.swing.GroupLayout(accountPanel3);
@@ -226,20 +178,21 @@ public class DashboardScreen extends javax.swing.JFrame {
         accountPanel3Layout.setHorizontalGroup(
             accountPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(accountPanel3Layout.createSequentialGroup()
-                .addContainerGap()
+                .addGap(20, 20, 20)
                 .addComponent(lbAccount3)
-                .addContainerGap(146, Short.MAX_VALUE))
+                .addContainerGap(317, Short.MAX_VALUE))
         );
         accountPanel3Layout.setVerticalGroup(
             accountPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(accountPanel3Layout.createSequentialGroup()
-                .addGap(28, 28, 28)
+                .addGap(29, 29, 29)
                 .addComponent(lbAccount3)
-                .addContainerGap(129, Short.MAX_VALUE))
+                .addContainerGap(248, Short.MAX_VALUE))
         );
 
-        pendingPanel4.setBackground(new java.awt.Color(255, 255, 255));
+        pendingPanel4.setBackground(new java.awt.Color(255, 255, 204));
 
+        lbPending4.setFont(new java.awt.Font("Helvetica Neue", 1, 24)); // NOI18N
         lbPending4.setText("Pending Orders");
 
         javax.swing.GroupLayout pendingPanel4Layout = new javax.swing.GroupLayout(pendingPanel4);
@@ -247,16 +200,16 @@ public class DashboardScreen extends javax.swing.JFrame {
         pendingPanel4Layout.setHorizontalGroup(
             pendingPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(pendingPanel4Layout.createSequentialGroup()
-                .addContainerGap()
+                .addGap(17, 17, 17)
                 .addComponent(lbPending4)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         pendingPanel4Layout.setVerticalGroup(
             pendingPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(pendingPanel4Layout.createSequentialGroup()
-                .addGap(26, 26, 26)
+                .addGap(30, 30, 30)
                 .addComponent(lbPending4)
-                .addContainerGap(121, Short.MAX_VALUE))
+                .addContainerGap(247, Short.MAX_VALUE))
         );
 
         javax.swing.GroupLayout contentPanelLayout = new javax.swing.GroupLayout(contentPanel);
@@ -264,39 +217,72 @@ public class DashboardScreen extends javax.swing.JFrame {
         contentPanelLayout.setHorizontalGroup(
             contentPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(contentPanelLayout.createSequentialGroup()
-                .addGap(29, 29, 29)
-                .addGroup(contentPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(contentPanelLayout.createSequentialGroup()
-                        .addGroup(contentPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(contentPanelLayout.createSequentialGroup()
-                                .addGap(8, 8, 8)
-                                .addComponent(salesPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addComponent(stockPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addGap(18, 18, 18)
-                        .addGroup(contentPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addComponent(accountPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(pendingPanel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
-                    .addComponent(lbInfo1)
-                    .addComponent(lbTitle))
-                .addContainerGap(546, Short.MAX_VALUE))
+                .addGap(40, 40, 40)
+                .addGroup(contentPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(pendingPanel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(accountPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(485, Short.MAX_VALUE))
         );
         contentPanelLayout.setVerticalGroup(
             contentPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(contentPanelLayout.createSequentialGroup()
-                .addGap(22, 22, 22)
-                .addComponent(lbTitle)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(lbInfo1)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 75, Short.MAX_VALUE)
-                .addGroup(contentPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(stockPanel1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(pendingPanel4, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(56, 56, 56)
-                .addGroup(contentPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(salesPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(accountPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addGap(55, 55, 55))
+                .addContainerGap(157, Short.MAX_VALUE)
+                .addComponent(pendingPanel4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(27, 27, 27)
+                .addComponent(accountPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(48, 48, 48))
         );
+
+        salesPanel2.setBackground(new java.awt.Color(204, 255, 204));
+
+        lbSales2.setFont(new java.awt.Font("Helvetica Neue", 1, 24)); // NOI18N
+        lbSales2.setText("Today's Sales");
+
+        javax.swing.GroupLayout salesPanel2Layout = new javax.swing.GroupLayout(salesPanel2);
+        salesPanel2.setLayout(salesPanel2Layout);
+        salesPanel2Layout.setHorizontalGroup(
+            salesPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(salesPanel2Layout.createSequentialGroup()
+                .addGap(19, 19, 19)
+                .addComponent(lbSales2)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+        salesPanel2Layout.setVerticalGroup(
+            salesPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(salesPanel2Layout.createSequentialGroup()
+                .addGap(24, 24, 24)
+                .addComponent(lbSales2)
+                .addContainerGap(253, Short.MAX_VALUE))
+        );
+
+        stockPanel1.setBackground(new java.awt.Color(204, 255, 255));
+
+        lbStock1.setFont(new java.awt.Font("Helvetica Neue", 1, 24)); // NOI18N
+        lbStock1.setText("Total Stock Items");
+
+        javax.swing.GroupLayout stockPanel1Layout = new javax.swing.GroupLayout(stockPanel1);
+        stockPanel1.setLayout(stockPanel1Layout);
+        stockPanel1Layout.setHorizontalGroup(
+            stockPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(stockPanel1Layout.createSequentialGroup()
+                .addGap(20, 20, 20)
+                .addComponent(lbStock1)
+                .addContainerGap(294, Short.MAX_VALUE))
+        );
+        stockPanel1Layout.setVerticalGroup(
+            stockPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(stockPanel1Layout.createSequentialGroup()
+                .addGap(26, 26, 26)
+                .addComponent(lbStock1)
+                .addContainerGap(251, Short.MAX_VALUE))
+        );
+
+        lbTitle.setFont(new java.awt.Font("Helvetica Neue", 1, 48)); // NOI18N
+        lbTitle.setText("Dashboard");
+
+        lbInfo1.setFont(new java.awt.Font("Helvetica Neue", 1, 24)); // NOI18N
+        lbInfo1.setForeground(new java.awt.Color(102, 102, 102));
+        lbInfo1.setText("Welcome to InfoPharma Ordering System");
 
         javax.swing.GroupLayout mainPanelLayout = new javax.swing.GroupLayout(mainPanel);
         mainPanel.setLayout(mainPanelLayout);
@@ -304,17 +290,34 @@ public class DashboardScreen extends javax.swing.JFrame {
             mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(mainPanelLayout.createSequentialGroup()
                 .addComponent(sidebarPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(41, 41, 41)
+                .addGroup(mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(lbTitle)
+                    .addComponent(lbInfo1)
+                    .addComponent(salesPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(stockPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(contentPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(265, Short.MAX_VALUE))
         );
         mainPanelLayout.setVerticalGroup(
             mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addComponent(sidebarPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
             .addGroup(mainPanelLayout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(contentPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(488, Short.MAX_VALUE))
+                .addGroup(mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(mainPanelLayout.createSequentialGroup()
+                        .addGap(35, 35, 35)
+                        .addComponent(lbTitle)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(lbInfo1)
+                        .addGap(26, 26, 26)
+                        .addComponent(stockPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(28, 28, 28)
+                        .addComponent(salesPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(mainPanelLayout.createSequentialGroup()
+                        .addContainerGap()
+                        .addComponent(contentPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addContainerGap(252, Short.MAX_VALUE))
         );
 
         setJMenuBar(jMenuBar1);
