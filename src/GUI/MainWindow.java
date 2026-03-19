@@ -46,6 +46,7 @@ public class MainWindow extends javax.swing.JFrame {
         btnLogout = new javax.swing.JButton();
         lbMenu = new javax.swing.JLabel();
         jLabel1 = new javax.swing.JLabel();
+        btnReports = new javax.swing.JButton();
         contentPanel = new javax.swing.JPanel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
@@ -100,6 +101,14 @@ public class MainWindow extends javax.swing.JFrame {
         jLabel1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/GUI/images/logomini.png"))); // NOI18N
         jLabel1.setText("jLabel1");
 
+        btnReports.setBackground(new java.awt.Color(0, 0, 51));
+        btnReports.setFont(new java.awt.Font("Helvetica Neue", 1, 20)); // NOI18N
+        btnReports.setForeground(new java.awt.Color(255, 255, 255));
+        btnReports.setText("Reports");
+        btnReports.setBorder(javax.swing.BorderFactory.createEtchedBorder());
+        btnReports.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        btnReports.addActionListener(this::btnReportsActionPerformed);
+
         javax.swing.GroupLayout sidebarPanelLayout = new javax.swing.GroupLayout(sidebarPanel);
         sidebarPanel.setLayout(sidebarPanelLayout);
         sidebarPanelLayout.setHorizontalGroup(
@@ -117,6 +126,7 @@ public class MainWindow extends javax.swing.JFrame {
                 .addContainerGap()
                 .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
                 .addContainerGap())
+            .addComponent(btnReports, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
         sidebarPanelLayout.setVerticalGroup(
             sidebarPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -125,7 +135,7 @@ public class MainWindow extends javax.swing.JFrame {
                 .addComponent(jLabel1)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(lbMenu, javax.swing.GroupLayout.PREFERRED_SIZE, 39, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(33, 33, 33)
+                .addGap(39, 39, 39)
                 .addComponent(btnDashboard, javax.swing.GroupLayout.PREFERRED_SIZE, 61, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
                 .addComponent(btnStock, javax.swing.GroupLayout.PREFERRED_SIZE, 61, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -133,9 +143,11 @@ public class MainWindow extends javax.swing.JFrame {
                 .addComponent(btnSales, javax.swing.GroupLayout.PREFERRED_SIZE, 61, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
                 .addComponent(btnOrders, javax.swing.GroupLayout.PREFERRED_SIZE, 61, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(30, 30, 30)
+                .addGap(18, 18, 18)
+                .addComponent(btnReports, javax.swing.GroupLayout.PREFERRED_SIZE, 61, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(51, 51, 51)
                 .addComponent(btnLogout, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(363, Short.MAX_VALUE))
+                .addContainerGap(257, Short.MAX_VALUE))
         );
 
         contentPanel.setLayout(new java.awt.BorderLayout());
@@ -159,8 +171,6 @@ public class MainWindow extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnDashboardActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDashboardActionPerformed
-        // TODO add your handling code here:
-        System.out.println("Dashboard clicked");
         contentPanel.removeAll();
         contentPanel.add(new Dashboard(), java.awt.BorderLayout.CENTER);
         contentPanel.revalidate();
@@ -168,8 +178,6 @@ public class MainWindow extends javax.swing.JFrame {
     }//GEN-LAST:event_btnDashboardActionPerformed
 
     private void btnStockActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnStockActionPerformed
-        // TODO add your handling code here:
-        System.out.println("Stock clicked");
         contentPanel.removeAll();
         contentPanel.add(new Stock(), java.awt.BorderLayout.CENTER);
         contentPanel.revalidate();
@@ -177,7 +185,6 @@ public class MainWindow extends javax.swing.JFrame {
     }//GEN-LAST:event_btnStockActionPerformed
 
     private void btnSalesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSalesActionPerformed
-        System.out.println("Sales clicked");
         contentPanel.removeAll();
         contentPanel.add(new Sales(), java.awt.BorderLayout.CENTER);
         contentPanel.revalidate();
@@ -185,7 +192,6 @@ public class MainWindow extends javax.swing.JFrame {
     }//GEN-LAST:event_btnSalesActionPerformed
 
     private void btnOrdersActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnOrdersActionPerformed
-        System.out.println("Orders clicked");
         contentPanel.removeAll();
         contentPanel.add(new Orders(), java.awt.BorderLayout.CENTER);
         contentPanel.revalidate();
@@ -196,6 +202,13 @@ public class MainWindow extends javax.swing.JFrame {
         new LoginScreen().setVisible(true);
         this.dispose();
     }//GEN-LAST:event_btnLogoutActionPerformed
+
+    private void btnReportsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnReportsActionPerformed
+        contentPanel.removeAll();
+        contentPanel.add(new Reports(), java.awt.BorderLayout.CENTER);
+        contentPanel.revalidate();
+        contentPanel.repaint();
+    }//GEN-LAST:event_btnReportsActionPerformed
 
     /**
      * @param args the command line arguments
@@ -210,6 +223,7 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JButton btnDashboard;
     private javax.swing.JButton btnLogout;
     private javax.swing.JButton btnOrders;
+    private javax.swing.JButton btnReports;
     private javax.swing.JButton btnSales;
     private javax.swing.JButton btnStock;
     private javax.swing.JPanel contentPanel;
