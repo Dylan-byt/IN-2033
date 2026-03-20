@@ -36,9 +36,9 @@ public class Orders extends javax.swing.JPanel {
 
         setBackground(new java.awt.Color(255, 255, 255));
 
-        lbInfo1.setFont(new java.awt.Font("Helvetica Neue", 1, 13)); // NOI18N
+        lbInfo1.setFont(new java.awt.Font("Helvetica Neue", 0, 20)); // NOI18N
         lbInfo1.setForeground(new java.awt.Color(102, 102, 102));
-        lbInfo1.setText("Welcome to InfoPharma Ordering System");
+        lbInfo1.setText("Welcome to the InfoPharma Ordering System");
 
         javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
         jPanel3.setLayout(jPanel3Layout);
@@ -84,7 +84,7 @@ public class Orders extends javax.swing.JPanel {
         jButton1.setForeground(new java.awt.Color(255, 255, 255));
         jButton1.setText("+   Place New Order");
 
-        jLabel1.setFont(new java.awt.Font("Helvetica Neue", 0, 30)); // NOI18N
+        jLabel1.setFont(new java.awt.Font("Helvetica Neue", 1, 36)); // NOI18N
         jLabel1.setText("Orders to InfoPharma");
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
@@ -99,7 +99,7 @@ public class Orders extends javax.swing.JPanel {
                 .addGap(85, 85, 85)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(lbInfo1)
-                    .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 300, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 405, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 282, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(106, 106, 106))
@@ -109,9 +109,9 @@ public class Orders extends javax.swing.JPanel {
             .addGroup(layout.createSequentialGroup()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
-                        .addGap(60, 60, 60)
+                        .addGap(72, 72, 72)
                         .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 45, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(18, 18, 18)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(lbInfo1))
                     .addGroup(layout.createSequentialGroup()
                         .addGap(89, 89, 89)
