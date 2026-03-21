@@ -6,7 +6,7 @@ package GUI;
 
 /**
  *
- * @author mehzanazkhan
+ * @author LukeBravermanCityUniversity
  */
 public class Reports extends javax.swing.JPanel {
 
