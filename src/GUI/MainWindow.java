@@ -48,6 +48,7 @@ public class MainWindow extends javax.swing.JFrame {
         jLabel1 = new javax.swing.JLabel();
         btnReports = new javax.swing.JButton();
         btnCustomers = new javax.swing.JButton();
+        btnStaff = new javax.swing.JButton();
         contentPanel = new javax.swing.JPanel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
@@ -124,6 +125,14 @@ public class MainWindow extends javax.swing.JFrame {
         btnCustomers.setPreferredSize(new java.awt.Dimension(55, 29));
         btnCustomers.addActionListener(this::btnCustomersActionPerformed);
 
+        btnStaff.setBackground(new java.awt.Color(0, 0, 51));
+        btnStaff.setFont(new java.awt.Font("Helvetica Neue", 1, 20)); // NOI18N
+        btnStaff.setForeground(new java.awt.Color(255, 255, 255));
+        btnStaff.setText("Manage Staff");
+        btnStaff.setBorder(javax.swing.BorderFactory.createEtchedBorder());
+        btnStaff.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        btnStaff.addActionListener(this::btnStaffActionPerformed);
+
         javax.swing.GroupLayout sidebarPanelLayout = new javax.swing.GroupLayout(sidebarPanel);
         sidebarPanel.setLayout(sidebarPanelLayout);
         sidebarPanelLayout.setHorizontalGroup(
@@ -143,6 +152,7 @@ public class MainWindow extends javax.swing.JFrame {
                 .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
                 .addContainerGap())
             .addComponent(btnCustomers, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(btnStaff, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
         sidebarPanelLayout.setVerticalGroup(
             sidebarPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -163,9 +173,11 @@ public class MainWindow extends javax.swing.JFrame {
                 .addComponent(btnOrders, javax.swing.GroupLayout.PREFERRED_SIZE, 61, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(12, 12, 12)
                 .addComponent(btnReports, javax.swing.GroupLayout.PREFERRED_SIZE, 61, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(88, 88, 88)
+                .addGap(18, 18, 18)
+                .addComponent(btnStaff, javax.swing.GroupLayout.PREFERRED_SIZE, 61, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(82, 82, 82)
                 .addComponent(btnLogout, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(156, Short.MAX_VALUE))
+                .addContainerGap(83, Short.MAX_VALUE))
         );
 
         contentPanel.setLayout(new java.awt.BorderLayout());
@@ -230,11 +242,18 @@ public class MainWindow extends javax.swing.JFrame {
 
     private void btnCustomersActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCustomersActionPerformed
                                        
-    contentPanel.removeAll();
-    contentPanel.add(new Customers(), java.awt.BorderLayout.CENTER);
-    contentPanel.revalidate();
-    contentPanel.repaint();
+        contentPanel.removeAll();
+        contentPanel.add(new Customers(), java.awt.BorderLayout.CENTER);
+        contentPanel.revalidate();
+        contentPanel.repaint();
     }//GEN-LAST:event_btnCustomersActionPerformed
+
+    private void btnStaffActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnStaffActionPerformed
+        contentPanel.removeAll();
+        contentPanel.add(new ManageStaff(), java.awt.BorderLayout.CENTER);
+        contentPanel.revalidate();
+        contentPanel.repaint();
+    }//GEN-LAST:event_btnStaffActionPerformed
 
     
 
@@ -256,6 +275,7 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JButton btnOrders;
     private javax.swing.JButton btnReports;
     private javax.swing.JButton btnSales;
+    private javax.swing.JButton btnStaff;
     private javax.swing.JButton btnStock;
     private javax.swing.JPanel contentPanel;
     private javax.swing.JLabel jLabel1;
