@@ -60,13 +60,13 @@ public class Customers extends javax.swing.JPanel {
 
         jTable1.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
-                {null, null, null, null, null},
-                {null, null, null, null, null},
-                {null, null, null, null, null},
-                {null, null, null, null, null}
+                {null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null}
             },
             new String [] {
-                "Account #", "Name", "Email", "Phone", "Credit Limit"
+                "Account #", "Name", "Email", "Phone", "Credit Limit", "Discount Plan", "Status"
             }
         ));
         jScrollPane2.setViewportView(jTable1);
@@ -120,7 +120,7 @@ public class Customers extends javax.swing.JPanel {
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addContainerGap(23, Short.MAX_VALUE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
             .addGroup(layout.createSequentialGroup()
                 .addGap(30, 30, 30)
@@ -147,7 +147,120 @@ public class Customers extends javax.swing.JPanel {
     }//GEN-LAST:event_jTextField1ActionPerformed
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-        // TODO add your handling code here:
+                                           
+    javax.swing.JTextField txtAccountId = new javax.swing.JTextField();
+    javax.swing.JTextField txtName = new javax.swing.JTextField();
+    javax.swing.JTextField txtEmail = new javax.swing.JTextField();
+    javax.swing.JTextField txtPhone = new javax.swing.JTextField();
+    javax.swing.JTextField txtCreditLimit = new javax.swing.JTextField();
+
+    String[] discountPlans = {"None", "Fixed Discount", "Variable (Volume-Based)"};
+    javax.swing.JComboBox<String> cmbDiscountPlan = new javax.swing.JComboBox<>(discountPlans);
+
+    javax.swing.JPanel panel = new javax.swing.JPanel(new java.awt.GridLayout(0, 1, 5, 5));
+    panel.add(new javax.swing.JLabel("Account ID:"));
+    panel.add(txtAccountId);
+    panel.add(new javax.swing.JLabel("Name:"));
+    panel.add(txtName);
+    panel.add(new javax.swing.JLabel("Email:"));
+    panel.add(txtEmail);
+    panel.add(new javax.swing.JLabel("Phone:"));
+    panel.add(txtPhone);
+    panel.add(new javax.swing.JLabel("Credit Limit:"));
+    panel.add(txtCreditLimit);
+    panel.add(new javax.swing.JLabel("Discount Plan:"));
+    panel.add(cmbDiscountPlan);
+
+    int result = javax.swing.JOptionPane.showConfirmDialog(
+        this,
+        panel,
+        "Add Customer",
+        javax.swing.JOptionPane.OK_CANCEL_OPTION,
+        javax.swing.JOptionPane.PLAIN_MESSAGE
+    );
+
+    if (result == javax.swing.JOptionPane.OK_OPTION) {
+        String accountId = txtAccountId.getText().trim();
+        String name = txtName.getText().trim();
+        String email = txtEmail.getText().trim();
+        String phone = txtPhone.getText().trim();
+        String creditLimitText = txtCreditLimit.getText().trim();
+        String discountPlan = cmbDiscountPlan.getSelectedItem().toString();
+
+        // Empty field validation
+        if (accountId.isEmpty() || name.isEmpty() || email.isEmpty() || phone.isEmpty() || creditLimitText.isEmpty()) {
+            javax.swing.JOptionPane.showMessageDialog(this, "Please fill in all fields.");
+            return;
+        }
+
+        // Account ID validation: must look like ACC001
+        if (!accountId.matches("ACC\\d+")) {
+            javax.swing.JOptionPane.showMessageDialog(this,
+                "Account ID must start with ACC followed by numbers, e.g. ACC001.");
+            return;
+        }
+
+        // Name validation: letters and spaces only, at least 2 chars
+        if (!name.matches("[A-Za-z ]{2,}")) {
+            javax.swing.JOptionPane.showMessageDialog(this,
+                "Please enter a valid customer name.");
+            return;
+        }
+
+        // Email validation
+        if (!email.matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$")) {
+            javax.swing.JOptionPane.showMessageDialog(this,
+                "Please enter a valid email address.");
+            return;
+        }
+
+        // Phone validation: 10 to 11 digits only
+        if (!phone.matches("\\d{10,11}")) {
+            javax.swing.JOptionPane.showMessageDialog(this,
+                "Phone number must contain 10 to 11 digits.");
+            return;
+        }
+
+        // Credit limit validation
+        double creditLimit;
+        try {
+            creditLimit = Double.parseDouble(creditLimitText);
+            if (creditLimit < 0) {
+                javax.swing.JOptionPane.showMessageDialog(this,
+                    "Credit limit must be 0 or greater.");
+                return;
+            }
+        } catch (NumberFormatException e) {
+            javax.swing.JOptionPane.showMessageDialog(this,
+                "Please enter a valid number for credit limit.");
+            return;
+        }
+
+        // Optional: prevent duplicate account IDs
+        javax.swing.table.DefaultTableModel model =
+            (javax.swing.table.DefaultTableModel) jTable1.getModel();
+
+        for (int i = 0; i < model.getRowCount(); i++) {
+            Object existingId = model.getValueAt(i, 0);
+            if (existingId != null && accountId.equalsIgnoreCase(existingId.toString())) {
+                javax.swing.JOptionPane.showMessageDialog(this,
+                    "Account ID already exists. Please use a unique Account ID.");
+                return;
+            }
+        }
+
+        // Add row to table
+        model.addRow(new Object[]{
+            accountId,
+            name,
+            email,
+            phone,
+            creditLimit,
+            discountPlan
+        });
+
+        javax.swing.JOptionPane.showMessageDialog(this, "Customer added successfully.");
+    }
     }//GEN-LAST:event_jButton1ActionPerformed
 
 
