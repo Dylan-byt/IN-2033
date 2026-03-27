@@ -57,7 +57,15 @@ public class NewOrder extends javax.swing.JDialog {
             new String [] {
                 "Product ID", "Quantity"
             }
-        ));
+        ) {
+            Class[] types = new Class [] {
+                java.lang.String.class, java.lang.Integer.class
+            };
+
+            public Class getColumnClass(int columnIndex) {
+                return types [columnIndex];
+            }
+        });
         jScrollPane1.setViewportView(jTableOrder);
 
         btnAddItem.setBackground(new java.awt.Color(0, 0, 51));
