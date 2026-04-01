@@ -139,6 +139,26 @@ public class SystemJUnitTest {
     }
 
     // -------------------------
+    // 📧 EMAIL NOTIFICATION TEST
+    // -------------------------
+    @Test
+    @Order(10)
+    void testEmailNotification() {
+        // Email service is now pre-configured with credentials
+        PU_COMMS_API_Impl emailService = new PU_COMMS_API_Impl();
+
+        // Send order confirmation email
+        boolean emailSent = emailService.sendEmail(
+            "Ben.Folley@citystgeorges.ac.uk",
+            "Order Confirmation",
+            "Your order has been placed successfully!\n\nOrder ID: " + orderID
+        );
+
+        assertTrue(emailSent);
+    }
+    
+
+    // -------------------------
     // MAIN - Run all tests
     // -------------------------
     public static void main(String[] args) throws Exception {
