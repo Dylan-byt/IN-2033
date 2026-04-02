@@ -24,9 +24,8 @@ public class SystemJUnitTest {
         System.out.println("=== TEST START ===");
     }
 
-    // -------------------------
-    // 🔐 LOGIN TEST
-    // -------------------------
+
+    // LOGIN TEST
     @Test
     @Order(1)
     void testLogin() {
@@ -38,9 +37,8 @@ public class SystemJUnitTest {
         assertTrue(login);
     }
 
-    // -------------------------
-    // 🛒 CREATE ORDER
-    // -------------------------
+
+    // CREATE ORDER
     @Test
     @Order(2)
     void testCreateOrder() {
@@ -50,9 +48,8 @@ public class SystemJUnitTest {
         assertNotNull(orderID);
     }
 
-    // -------------------------
-    // 📦 PROCESS ORDER
-    // -------------------------
+
+    // PROCESS ORDER
     @Test
     @Order(3)
     void testProcessOrder() {
@@ -64,9 +61,8 @@ public class SystemJUnitTest {
         assertEquals("PROCESSED", status);
     }
 
-    // -------------------------
-    // 📦 STOCK CHECK
-    // -------------------------
+
+    // STOCK CHECK
     @Test
     @Order(4)
     void testStockCheck() {
@@ -76,9 +72,9 @@ public class SystemJUnitTest {
         assertTrue(stock >= 0);
     }
 
-    // -------------------------
-    // 💳 CARD PAYMENT
-    // -------------------------
+
+    // CARD PAYMENT
+
     @Test
     @Order(5)
     void testCardPayment() {
@@ -88,9 +84,9 @@ public class SystemJUnitTest {
         assertTrue(result);
     }
 
-    // -------------------------
-    // 💵 CASH PAYMENT
-    // -------------------------
+
+    // CASH PAYMENT
+
     @Test
     @Order(6)
     void testCashPayment() {
@@ -100,9 +96,9 @@ public class SystemJUnitTest {
         assertTrue(result);
     }
 
-    // -------------------------
-    // 💳 CREDIT PAYMENT
-    // -------------------------
+
+    // CREDIT PAYMENT
+
     @Test
     @Order(7)
     void testCreditPayment() {
@@ -112,9 +108,8 @@ public class SystemJUnitTest {
         assertTrue(result);
     }
 
-    // -------------------------
-    // 🧾 RECEIPT
-    // -------------------------
+
+    // RECEIPT
     @Test
     @Order(8)
     void testReceipt() {
@@ -125,9 +120,8 @@ public class SystemJUnitTest {
         assertTrue(receipt.contains("Receipt"));
     }
 
-    // -------------------------
-    // 📚 CATALOGUE
-    // -------------------------
+
+    // CATALOGUE
     @Test
     @Order(9)
     void testCatalogue() {
@@ -137,10 +131,9 @@ public class SystemJUnitTest {
         assertNotNull(results);
         assertTrue(results.length > 0);
     }
+    
+    // EMAIL NOTIFICATION TEST
 
-    // -------------------------
-    // 📧 EMAIL NOTIFICATION TEST
-    // -------------------------
     @Test
     @Order(10)
     void testEmailNotification() {
@@ -158,9 +151,9 @@ public class SystemJUnitTest {
     }
     
 
-    // -------------------------
+
     // MAIN - Run all tests
-    // -------------------------
+
     public static void main(String[] args) throws Exception {
         SystemJUnitTest test = new SystemJUnitTest();
         
