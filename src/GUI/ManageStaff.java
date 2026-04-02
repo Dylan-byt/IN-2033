@@ -2,19 +2,31 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JPanel.java to edit this template
  */
+
+
 package GUI;
+
+import Backend.*;
+
+
 
 /**
  *
  * @author mehzanazkhan
  */
 public class ManageStaff extends javax.swing.JPanel {
+    
+    private SA_LOGIN_API loginAPI;
+    
+    
 
     /**
      * Creates new form ManageStaff
      */
     public ManageStaff() {
         initComponents();
+        
+        loginAPI = new SA_LOGIN_API(DBConnection.getConnection());
     }
 
     /**
@@ -63,15 +75,23 @@ public class ManageStaff extends javax.swing.JPanel {
 
         jTable1.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null}
+                {null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null}
             },
             new String [] {
-                "Account #", "StaffID", "Name", "Email", "Phone", "Role"
+                "Account #", "StaffID", "Name", "Email", "Phone", "Role", "Password"
             }
-        ));
+        ) {
+            Class[] types = new Class [] {
+                java.lang.Integer.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.Integer.class, java.lang.String.class, java.lang.String.class
+            };
+
+            public Class getColumnClass(int columnIndex) {
+                return types [columnIndex];
+            }
+        });
         jScrollPane2.setViewportView(jTable1);
 
         jButton1.setBackground(new java.awt.Color(0, 0, 51));
@@ -182,6 +202,7 @@ public class ManageStaff extends javax.swing.JPanel {
         javax.swing.JTextField txtPhone = new javax.swing.JTextField();
         String[] roles = {"Admin", "Manager", "Pharmacist"};
         javax.swing.JComboBox<String> comboRole = new javax.swing.JComboBox<>(roles);
+        //javax.swing.JTextField password = new javax.swing.JTextField();
         
 
         /*
@@ -219,6 +240,7 @@ public class ManageStaff extends javax.swing.JPanel {
             String email = txtEmail.getText().trim();
             String phone = txtPhone.getText().trim();
             String role = ((String) comboRole.getSelectedItem()).trim();
+            String password = generatePassword(8);
             
 
             // Empty field validation
@@ -276,7 +298,13 @@ public class ManageStaff extends javax.swing.JPanel {
                     return;
                 }
             }
+            
+            
+            
+            
 
+            
+            
             // Add row to table
             model.addRow(new Object[]{
                 accountId,
@@ -284,8 +312,16 @@ public class ManageStaff extends javax.swing.JPanel {
                 name,
                 email,
                 phone,
-                role
+                role,
+                password
             });
+            
+            loginAPI.createStaff(name, password);
+            
+            
+            
+            
+            
 
             javax.swing.JOptionPane.showMessageDialog(this, "Staff member added successfully.");
         }
@@ -353,6 +389,19 @@ public class ManageStaff extends javax.swing.JPanel {
 
     }//GEN-LAST:event_jButton3ActionPerformed
 
+    private String generatePassword(int length) {
+    String chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*";
+    java.security.SecureRandom random = new java.security.SecureRandom();
+    
+    StringBuilder password = new StringBuilder();
+
+    for (int i = 0; i < length; i++) {
+        int index = random.nextInt(chars.length());
+        password.append(chars.charAt(index));
+    }
+
+    return password.toString();
+}
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private java.awt.Label CustomerJpanel2;
