@@ -1,8 +1,8 @@
-package Backend;
 
-import Backend.PU_COMMS_API;
+
 import javax.mail.*;
 import javax.mail.internet.*;
+
 import java.util.Properties;
 
 /**
