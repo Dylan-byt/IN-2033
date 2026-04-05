@@ -20,4 +20,6 @@ public interface CustomerAPI {
     boolean deleteCustomer(String accountId) throws Exception;
 
     boolean customerExists(String accountId) throws Exception;
+    
+    void normaliseStatuses() throws Exception;
 }

@@ -128,4 +128,23 @@ public class CustomerAPI_Impl implements CustomerAPI  {
             }
         }
     }
+        
+        
+    public void normaliseStatuses() throws Exception {
+    String sql1 = "UPDATE ca_customers SET account_status = 'NORMAL' WHERE account_status = 'ACTIVE'";
+    String sql2 = "UPDATE ca_customers SET account_status = 'IN_DEFAULT' WHERE account_status = 'CLOSED'";
+
+    try (Connection conn = DBConnection.getConnection();
+         PreparedStatement ps1 = conn.prepareStatement(sql1);
+         PreparedStatement ps2 = conn.prepareStatement(sql2)) {
+
+        if (conn == null) {
+            throw new Exception("Database connection failed.");
+        }
+
+        ps1.executeUpdate();
+        ps2.executeUpdate();
+   
+        }
+    }
 }

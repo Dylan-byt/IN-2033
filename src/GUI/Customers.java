@@ -31,21 +31,36 @@ public class Customers extends javax.swing.JPanel {
     /**
      * Creates new form Customers
      */
-    public Customers() {
-        initComponents();
-        Connection conn = DBConnection.getConnection();
-        merchantAPI = new SA_Merchant_API_Impl(conn);
-        loadCustomersTable();
-    }
-    
-    public Customers(String role) {
-        initComponents();
-        this.userRole = role;
-        Connection conn = DBConnection.getConnection();
-        merchantAPI = new SA_Merchant_API_Impl(conn);
-        loadCustomersTable();
+public Customers() {
+    initComponents();
+    Connection conn = DBConnection.getConnection();
+    merchantAPI = new SA_Merchant_API_Impl(conn);
 
+    try {
+        customerAPI.normaliseStatuses();
+    } catch (Exception e) {
+        JOptionPane.showMessageDialog(this,
+            "Error normalising statuses: " + e.getMessage());
     }
+
+    loadCustomersTable();
+}
+
+public Customers(String role) {
+    initComponents();
+    this.userRole = role;
+    Connection conn = DBConnection.getConnection();
+    merchantAPI = new SA_Merchant_API_Impl(conn);
+
+    try {
+        customerAPI.normaliseStatuses();
+    } catch (Exception e) {
+        JOptionPane.showMessageDialog(this,
+            "Error normalising statuses: " + e.getMessage());
+    }
+
+    loadCustomersTable();
+}
      
 
     /**
@@ -68,6 +83,7 @@ public class Customers extends javax.swing.JPanel {
         jButton1 = new javax.swing.JButton();
         jButton2 = new javax.swing.JButton();
         jButton3 = new javax.swing.JButton();
+        jButton4 = new javax.swing.JButton();
 
         setBackground(new java.awt.Color(255, 255, 255));
         setFont(new java.awt.Font("Helvetica Neue", 1, 24)); // NOI18N
@@ -122,6 +138,12 @@ public class Customers extends javax.swing.JPanel {
         jButton3.setText("Update Credit Limit");
         jButton3.addActionListener(this::jButton3ActionPerformed);
 
+        jButton4.setBackground(new java.awt.Color(0, 0, 51));
+        jButton4.setFont(new java.awt.Font("Helvetica Neue", 1, 18)); // NOI18N
+        jButton4.setForeground(new java.awt.Color(255, 255, 255));
+        jButton4.setText("Reactivate Account");
+        jButton4.addActionListener(this::jButton4ActionPerformed);
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -140,12 +162,15 @@ public class Customers extends javax.swing.JPanel {
                                 .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, 341, javax.swing.GroupLayout.PREFERRED_SIZE))
                             .addComponent(jLabel3))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addComponent(jButton1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(jButton3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                        .addGap(29, 29, 29)
-                        .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 216, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(66, 66, 66))))
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                    .addComponent(jButton3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                    .addComponent(jButton1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                                .addGap(29, 29, 29)
+                                .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 221, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addComponent(jButton4))
+                        .addGap(61, 61, 61))))
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -166,7 +191,9 @@ public class Customers extends javax.swing.JPanel {
                             .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 41, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jButton3, javax.swing.GroupLayout.PREFERRED_SIZE, 43, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 90, Short.MAX_VALUE)))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(jButton4, javax.swing.GroupLayout.PREFERRED_SIZE, 43, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 84, Short.MAX_VALUE)))
                 .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 521, javax.swing.GroupLayout.PREFERRED_SIZE))
         );
 
@@ -368,6 +395,59 @@ public class Customers extends javax.swing.JPanel {
 
     }//GEN-LAST:event_jButton3ActionPerformed
 
+    private void jButton4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton4ActionPerformed
+            if (userRole == null || !userRole.equalsIgnoreCase("Manager")) {
+        JOptionPane.showMessageDialog(this,
+            "Access denied. Only managers can reactivate accounts.");
+        return;
+    }
+
+    int selectedRow = jTable1.getSelectedRow();
+
+    if (selectedRow == -1) {
+        JOptionPane.showMessageDialog(this,
+            "Please select a customer first.");
+        return;
+    }
+
+    String status = jTable1.getValueAt(selectedRow, 5).toString();
+
+    if (!status.equalsIgnoreCase("IN_DEFAULT")) {
+        JOptionPane.showMessageDialog(this,
+            "Only accounts in IN_DEFAULT can be reactivated.");
+        return;
+    }
+
+    int confirm = JOptionPane.showConfirmDialog(
+        this,
+        "Are you sure you want to reactivate this account?",
+        "Confirm Reactivation",
+        JOptionPane.YES_NO_OPTION
+    );
+
+    if (confirm != JOptionPane.YES_OPTION) {
+        return;
+    }
+
+    try {
+        String accountId = jTable1.getValueAt(selectedRow, 0).toString();
+        int customerId = Integer.parseInt(accountId.substring(3));
+
+        boolean updated = merchantAPI.managerReactivateAccount(customerId);
+
+        if (updated) {
+            JOptionPane.showMessageDialog(this,
+                "Account reactivated successfully.");
+            loadCustomersTable();
+        } else {
+            JOptionPane.showMessageDialog(this,
+                "Failed to reactivate account.");
+        }
+    } catch (Exception e) {
+        JOptionPane.showMessageDialog(this, e.getMessage());
+    }
+    }//GEN-LAST:event_jButton4ActionPerformed
+
     private void loadCustomersTable() {
     try {
         DefaultTableModel model = (DefaultTableModel) jTable1.getModel();
@@ -391,12 +471,15 @@ public class Customers extends javax.swing.JPanel {
         JOptionPane.showMessageDialog(this, "Error loading customers: " + e.getMessage());
     }
 }
+    
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private java.awt.Label CustomerJpanel2;
     private javax.swing.JButton jButton1;
     private javax.swing.JButton jButton2;
     private javax.swing.JButton jButton3;
+    private javax.swing.JButton jButton4;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
