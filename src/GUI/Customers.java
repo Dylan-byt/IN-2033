@@ -112,6 +112,7 @@ public Customers(String role) {
         jButton2 = new javax.swing.JButton();
         jButton3 = new javax.swing.JButton();
         jButton4 = new javax.swing.JButton();
+        jButton5 = new javax.swing.JButton();
 
         setBackground(new java.awt.Color(255, 255, 255));
         setFont(new java.awt.Font("Helvetica Neue", 1, 24)); // NOI18N
@@ -172,6 +173,12 @@ public Customers(String role) {
         jButton4.setText("Reactivate Account");
         jButton4.addActionListener(this::jButton4ActionPerformed);
 
+        jButton5.setBackground(new java.awt.Color(0, 0, 51));
+        jButton5.setFont(new java.awt.Font("Helvetica Neue", 1, 18)); // NOI18N
+        jButton5.setForeground(new java.awt.Color(255, 255, 255));
+        jButton5.setText("Remind Customer");
+        jButton5.addActionListener(this::jButton5ActionPerformed);
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -197,7 +204,10 @@ public Customers(String role) {
                                     .addComponent(jButton1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                                 .addGap(29, 29, 29)
                                 .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 221, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addComponent(jButton4))
+                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                .addComponent(jButton4, javax.swing.GroupLayout.PREFERRED_SIZE, 216, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(29, 29, 29)
+                                .addComponent(jButton5, javax.swing.GroupLayout.PREFERRED_SIZE, 221, javax.swing.GroupLayout.PREFERRED_SIZE)))
                         .addGap(61, 61, 61))))
         );
         jPanel1Layout.setVerticalGroup(
@@ -220,7 +230,9 @@ public Customers(String role) {
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jButton3, javax.swing.GroupLayout.PREFERRED_SIZE, 43, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(jButton4, javax.swing.GroupLayout.PREFERRED_SIZE, 43, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(jButton4, javax.swing.GroupLayout.DEFAULT_SIZE, 43, Short.MAX_VALUE)
+                            .addComponent(jButton5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 84, Short.MAX_VALUE)))
                 .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 521, javax.swing.GroupLayout.PREFERRED_SIZE))
         );
@@ -531,6 +543,73 @@ public Customers(String role) {
     }
     }//GEN-LAST:event_jButton4ActionPerformed
 
+    private void jButton5ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton5ActionPerformed
+        int selectedRow = jTable1.getSelectedRow();
+
+        if (selectedRow == -1) {
+            JOptionPane.showMessageDialog(this, "Please select a customer first.");
+            return;
+        }
+
+        String customerName = String.valueOf(jTable1.getValueAt(selectedRow, 1));
+        String accountId = String.valueOf(jTable1.getValueAt(selectedRow, 0));
+        String balance = String.valueOf(jTable1.getValueAt(selectedRow, 6));
+
+        showReminderLetter(customerName, accountId, balance);
+    }//GEN-LAST:event_jButton5ActionPerformed
+
+    private void showReminderLetter(String customerName, String accountId, String balance) {
+        String reminderText =
+            "InfoPharma ORDERING SYSTEM STUDENT'S BRIEF\n\n"
+            + "9.6 Appendix 6: Payment overdue Reminders\n\n"
+            + "Client: " + customerName + "\n"
+            + "3, High Level Drive,\n"
+            + "Sydenham,\n"
+            + "SE26 3ET\n"
+            + "Phone: 0208 778 0124\n"
+            + "Fax: 0208 778 0125\n\n"
+            + "InfoPharma Ltd.,\n"
+            + "19 High St.,\n"
+            + "Ashford,\n"
+            + "Kent\n\n"
+            + "Dear Client,\n\n"
+            + "REMINDER - INVOICE NO: 197362\n\n"
+            + "IPOS Account: " + accountId + "            Total Amount: " + balance + "\n\n"
+            + "According to our records, it appears that we have not yet received payment "
+            + "of the above invoice, which was raised against " + customerName + ".\n\n"
+            + "We would appreciate payment at your earliest convenience.\n\n"
+            + "If you have already sent a payment to us recently, please accept our apologies.\n\n"
+            + "Yours sincerely,\n\n"
+            + "A. Pettie, Director of Operations, InfoPharma Ltd.\n\n"
+            + "------------------------------------------------------------\n\n"
+            + "SECOND REMINDER - INVOICE NO: 197362\n\n"
+            + "IPOS Account: " + accountId + "            Total Amount: " + balance + "\n\n"
+            + "It appears that we still have not yet received payment of the above invoice "
+            + "despite the earlier reminder.\n\n"
+            + "We would appreciate it if you would settle this invoice in full by return.\n\n"
+            + "If you have already sent a payment to us recently, please accept our apologies.\n\n"
+            + "Yours sincerely,\n\n"
+            + "A. Pettie, Director of Operations, InfoPharma Ltd.";
+
+        javax.swing.JTextArea textArea = new javax.swing.JTextArea(reminderText);
+        textArea.setEditable(false);
+        textArea.setLineWrap(true);
+        textArea.setWrapStyleWord(true);
+        textArea.setCaretPosition(0);
+        textArea.setFont(new java.awt.Font("Serif", java.awt.Font.PLAIN, 14));
+        textArea.setMargin(new java.awt.Insets(14, 14, 14, 14));
+
+        javax.swing.JScrollPane scrollPane = new javax.swing.JScrollPane(textArea);
+        scrollPane.setPreferredSize(new java.awt.Dimension(760, 620));
+
+        JOptionPane.showMessageDialog(
+            this,
+            scrollPane,
+            "Customer Payment Reminder",
+            JOptionPane.PLAIN_MESSAGE
+        );
+    }
+
     private void loadCustomersTable() {
     try {
         DefaultTableModel model = (DefaultTableModel) jTable1.getModel();
@@ -596,6 +675,7 @@ private void filterCustomers() {
     private javax.swing.JButton jButton2;
     private javax.swing.JButton jButton3;
     private javax.swing.JButton jButton4;
+    private javax.swing.JButton jButton5;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
