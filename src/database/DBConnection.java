@@ -11,12 +11,8 @@ public class DBConnection {
 
     public static Connection getConnection() {
         try {
-<<<<<<< HEAD:src/main/java/database/DBConnection.java
-            
-=======
             Class.forName("org.sqlite.JDBC");
 
->>>>>>> 9bd6be519d3ec58c8e0ccc92c9c28106a09f9af9:src/database/DBConnection.java
             Connection conn = DriverManager.getConnection(URL);
 
             try (Statement stmt = conn.createStatement()) {

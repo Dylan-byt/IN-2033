@@ -142,7 +142,7 @@ public class SA_ORD_API {
             return;
         }
 
-        // ✅ Check stock via Stock API
+        // Check stock via Stock API
         for (Map.Entry<Integer, Integer> e : items.entrySet()) {
 
             int stock = stockApi.getStock(e.getKey());
@@ -153,7 +153,7 @@ public class SA_ORD_API {
             }
         }
 
-        // ✅ Reduce stock via Stock API
+        // Reduce stock via Stock API
         for (Map.Entry<Integer, Integer> e : items.entrySet()) {
             stockApi.updateStock(e.getKey(), -e.getValue());
         }
