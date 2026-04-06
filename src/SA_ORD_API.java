@@ -4,15 +4,17 @@ import java.sql.*;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import database.DBConnection;
+import stock.CA_Stock_API_Impl;
 
 public class SA_ORD_API {
 
     private Connection conn;
 
-    private SA_Stock_API stockApi;
+    private CA_Stock_API_Impl stockApi;
 
     // how to connect to the database and run queries will be in all classes to connect and change the database
-    public SA_ORD_API(Connection conn, SA_Stock_API stockApi) {
+    public SA_ORD_API(Connection conn, CA_Stock_API_Impl stockApi) {
         this.conn = conn;
         this.stockApi = stockApi;
     }

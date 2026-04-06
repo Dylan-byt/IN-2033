@@ -3,6 +3,7 @@ package stock;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import database.DBConnection;
 
 public class CA_Stock_API_Impl {
 
@@ -112,23 +113,38 @@ public class CA_Stock_API_Impl {
     }
 
     /**
-     * RECORD DELIVERY (increase stock)
+     * RECORD DELIVERY (increase stock from SA)
      */
-    public boolean recordDelivery(int productId, int deliveredQty) {
-        try {
-            String sql = "UPDATE ca_stock SET quantity = quantity + ? WHERE product_id = ?";
-            PreparedStatement ps = conn.prepareStatement(sql);
+    public boolean recordDelivery(int productId, int quantity) {
 
-            ps.setInt(1, deliveredQty);
-            ps.setInt(2, productId);
-
-            return ps.executeUpdate() > 0;
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+    // Basic validation
+    if (quantity <= 0) {
+        System.out.println("Invalid delivery quantity");
         return false;
     }
+
+    try {
+        String sql = "UPDATE ca_stock SET quantity = quantity + ? WHERE product_id = ?";
+        PreparedStatement ps = conn.prepareStatement(sql);
+
+        ps.setInt(1, quantity);
+        ps.setInt(2, productId);
+
+        int rows = ps.executeUpdate();
+
+        if (rows > 0) {
+            System.out.println("Delivery recorded: +" + quantity + " for product " + productId);
+            return true;
+        } else {
+            System.out.println("Product not found");
+        }
+
+    } catch (SQLException e) {
+        e.printStackTrace();
+    }
+
+    return false;
+}
 
     /**
      * GET CURRENT STOCK LEVEL
