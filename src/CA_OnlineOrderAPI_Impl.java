@@ -3,16 +3,21 @@
 import merchant.SA_Merchant_API;
 import java.sql.*;
 import java.util.Map;
+import database.DBConnection;
 
 public class CA_OnlineOrderAPI_Impl implements CA_OnlineOrderAPI {
 
     private SA_ORD_API ordApi;
+    private CA_Stock_API_Impl stockApi;
     private SA_Merchant_API merchantApi;
     private Connection conn;
 
-    public CA_OnlineOrderAPI_Impl(SA_ORD_API ordApi, SA_Merchant_API merchantApi, Connection conn) {
+    
+
+    public CA_OnlineOrderAPI_Impl(SA_ORD_API ordApi, SA_Merchant_API merchantApi, CA_Stock_API_Impl stockApi, Connection conn) {
         this.ordApi = ordApi;
         this.merchantApi = merchantApi;
+        this.stockApi = stockApi;
         this.conn = conn;
     }
 

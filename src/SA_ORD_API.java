@@ -4,14 +4,19 @@ import java.sql.*;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import database.DBConnection;
+import stock.CA_Stock_API_Impl;
 
 public class SA_ORD_API {
 
     private Connection conn;
 
+    private CA_Stock_API_Impl stockApi;
+
     // how to connect to the database and run queries will be in all classes to connect and change the database
-    public SA_ORD_API(Connection conn) {
+    public SA_ORD_API(Connection conn, CA_Stock_API_Impl stockApi) {
         this.conn = conn;
+        this.stockApi = stockApi;
     }
 
     /**
@@ -119,68 +124,50 @@ public class SA_ORD_API {
      */
     public void submitOrder(String orderID) {
 
-        try {
-            // Get items in order
-            String query = "SELECT product_id, quantity FROM ca_online_order_items WHERE online_order_id = ?";
-            PreparedStatement ps = conn.prepareStatement(query);
-            ps.setString(1, orderID);
+    try {
+        String query = "SELECT product_id, quantity FROM ca_online_order_items WHERE online_order_id = ?";
+        PreparedStatement ps = conn.prepareStatement(query);
+        ps.setString(1, orderID);
 
-            ResultSet rs = ps.executeQuery();
+        ResultSet rs = ps.executeQuery();
 
-            //store items temporarily in a map
-            Map<Integer, Integer> items = new HashMap<>();
+        Map<Integer, Integer> items = new HashMap<>();
 
-            while (rs.next()) {
-                items.put(rs.getInt("product_id"), rs.getInt("quantity"));
-            }
+        while (rs.next()) {
+            items.put(rs.getInt("product_id"), rs.getInt("quantity"));
+        }
 
-            // no items in the order
-            if (items.isEmpty()) {
-                System.out.println("Order is empty.");
+        if (items.isEmpty()) {
+            System.out.println("Order is empty.");
+            return;
+        }
+
+        // ✅ Check stock via Stock API
+        for (Map.Entry<Integer, Integer> e : items.entrySet()) {
+
+            int stock = stockApi.getStock(e.getKey());
+
+            if (stock < e.getValue()) {
+                System.out.println("Order rejected: not enough stock for product " + e.getKey());
                 return;
             }
-
-            // 2. Check stock for the items in the order
-            for (Map.Entry<Integer, Integer> e : items.entrySet()) {
-
-                String stockQuery = "SELECT quantity FROM ca_stock WHERE product_id = ?";
-                PreparedStatement psStock = conn.prepareStatement(stockQuery);
-                psStock.setInt(1, e.getKey());
-
-                ResultSet rsStock = psStock.executeQuery();
-
-                if (rsStock.next()) {
-                    int stock = rsStock.getInt("quantity");
-
-                    if (stock < e.getValue()) {
-                        System.out.println("Order rejected: not enough stock for product " + e.getKey());
-                        return;
-                    }
-                }
-            }
-
-            // 3. Reduce stock in the database for the items in the order
-            for (Map.Entry<Integer, Integer> e : items.entrySet()) {
-
-                String update = "UPDATE ca_stock SET quantity = quantity - ? WHERE product_id = ?";
-                PreparedStatement psUpdate = conn.prepareStatement(update);
-
-                psUpdate.setInt(1, e.getValue());
-                psUpdate.setInt(2, e.getKey());
-                psUpdate.executeUpdate();
-            }
-
-            // 4. Mark order processed
-            String updateOrder = "UPDATE ca_online_orders SET processed = TRUE WHERE online_order_id = ?";
-            PreparedStatement psUpdateOrder = conn.prepareStatement(updateOrder);
-            psUpdateOrder.setString(1, orderID);
-            psUpdateOrder.executeUpdate();
-
-            System.out.println("Order accepted: " + orderID);
-
-        } catch (SQLException e) {
-            e.printStackTrace();
         }
+
+        // ✅ Reduce stock via Stock API
+        for (Map.Entry<Integer, Integer> e : items.entrySet()) {
+            stockApi.updateStock(e.getKey(), -e.getValue());
+        }
+
+        // Mark order processed
+        String updateOrder = "UPDATE ca_online_orders SET processed = TRUE WHERE online_order_id = ?";
+        PreparedStatement psUpdateOrder = conn.prepareStatement(updateOrder);
+        psUpdateOrder.setString(1, orderID);
+        psUpdateOrder.executeUpdate();
+
+        System.out.println("Order accepted: " + orderID);
+
+    } catch (SQLException e) {
+        e.printStackTrace();
     }
 
     /**
