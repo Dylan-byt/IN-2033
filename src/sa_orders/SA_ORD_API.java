@@ -1,8 +1,6 @@
 package sa_orders;
 
 
-
-
 import java.sql.*;
 import java.util.HashMap;
 import java.util.Map;
@@ -265,4 +263,25 @@ public class SA_ORD_API {
 
         return catalogue;
     }
+    
+    
+    
+    
+    
+    public ResultSet getAllOrders() {
+    try {
+        String query = "SELECT o.online_order_id, o.processed, i.product_id, i.quantity " +
+                       "FROM ca_online_orders o " +
+                       "JOIN ca_online_order_items i ON o.online_order_id = i.online_order_id";
+
+        PreparedStatement ps = conn.prepareStatement(query);
+        return ps.executeQuery();
+
+    } catch (SQLException e) {
+        e.printStackTrace();
+        return null;
+    }
+}
+    
+    
 }

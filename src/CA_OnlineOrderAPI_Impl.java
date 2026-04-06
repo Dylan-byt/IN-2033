@@ -7,14 +7,14 @@ import database.DBConnection;
 
 public class CA_OnlineOrderAPI_Impl implements CA_OnlineOrderAPI {
 
-    private SA_ORD_API ordApi;
-    private CA_Stock_API_Impl stockApi;
+    private sa_orders.SA_ORD_API ordApi;
+    private stock.CA_Stock_API_Impl stockApi;
     private SA_Merchant_API merchantApi;
     private Connection conn;
 
     
 
-    public CA_OnlineOrderAPI_Impl(SA_ORD_API ordApi, SA_Merchant_API merchantApi, CA_Stock_API_Impl stockApi, Connection conn) {
+    public CA_OnlineOrderAPI_Impl(sa_orders.SA_ORD_API ordApi, SA_Merchant_API merchantApi, stock.CA_Stock_API_Impl stockApi, Connection conn) {
         this.ordApi = ordApi;
         this.merchantApi = merchantApi;
         this.stockApi = stockApi;
@@ -25,6 +25,8 @@ public class CA_OnlineOrderAPI_Impl implements CA_OnlineOrderAPI {
      * Process online order
      * basket format: 1:2,2:1
      */
+
+
     @Override
     public void processOnlineOrder(String orderID, String basketOrder) {
 
@@ -268,3 +270,5 @@ public class CA_OnlineOrderAPI_Impl implements CA_OnlineOrderAPI {
         throw new UnsupportedOperationException("Unimplemented method 'payByCredit'");
     }
 }
+
+
