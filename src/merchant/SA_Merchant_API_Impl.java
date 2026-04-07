@@ -21,6 +21,25 @@ public class SA_Merchant_API_Impl implements SA_Merchant_API {
         this.conn = conn;
     }
 
+    private boolean isFrontendOrder(String orderID) {
+        return orderID != null && orderID.startsWith("ONL-");
+    }
+
+    private boolean onlineOrderExists(String orderID) throws SQLException {
+        String check = "SELECT online_order_id FROM ca_online_orders WHERE online_order_id = ?";
+        PreparedStatement psCheck = conn.prepareStatement(check);
+        psCheck.setString(1, orderID);
+        ResultSet rs = psCheck.executeQuery();
+        return rs.next();
+    }
+
+    private int getNextId(String tableName, String idColumn) throws SQLException {
+        String sql = "SELECT COALESCE(MAX(" + idColumn + "), 0) + 1 AS next_id FROM " + tableName;
+        PreparedStatement ps = conn.prepareStatement(sql);
+        ResultSet rs = ps.executeQuery();
+        return rs.next() ? rs.getInt("next_id") : 1;
+    }
+
     /**
      * PROCESS CREDIT PAYMENT
      * Checks if account is not IN_DEFAULT, updates balance if allowed
@@ -87,14 +106,8 @@ public class SA_Merchant_API_Impl implements SA_Merchant_API {
     public boolean processCardPayment(String orderID, String cardNumber, String expiry, double amount) {
 
         try {
-            // Check order exists
-            String check = "SELECT online_order_id FROM ca_online_orders WHERE online_order_id = ?";
-            PreparedStatement psCheck = conn.prepareStatement(check);
-            psCheck.setString(1, orderID);
-
-            ResultSet rs = psCheck.executeQuery();
-
-            if (!rs.next()) {
+            // Online orders must exist in ca_online_orders. Frontend-generated ONL IDs are allowed.
+            if (!isFrontendOrder(orderID) && !onlineOrderExists(orderID)) {
                 System.out.println("Payment failed: order not found");
                 return false;
             }
@@ -105,6 +118,11 @@ public class SA_Merchant_API_Impl implements SA_Merchant_API {
                 return false;
             }
 
+            // Frontend ONL payments are persisted after sale_id is created in recordCustomerPurchase.
+            if (isFrontendOrder(orderID)) {
+                return true;
+            }
+
             // Insert payment record
             String sql = "INSERT INTO ca_payments (payment_id, sale_id, payment_method, amount) VALUES (?, NULL, ?, ?)";
 
@@ -112,7 +130,7 @@ public class SA_Merchant_API_Impl implements SA_Merchant_API {
 
             ps.setInt(1, (int)(Math.random() * 100000)); // TEMP ID
             ps.setString(2, "CARD");
-            ps.setDouble(3, 0.0); // you can calculate real total later
+            ps.setDouble(3, amount);
 
             ps.executeUpdate();
 
@@ -134,16 +152,15 @@ public class SA_Merchant_API_Impl implements SA_Merchant_API {
     public boolean processCashPayment(String orderID, double amount) {
 
         try {
-            // check order exists
-            String check = "SELECT online_order_id FROM ca_online_orders WHERE online_order_id = ?";
-            PreparedStatement psCheck = conn.prepareStatement(check);
-            psCheck.setString(1, orderID);
-
-            ResultSet rs = psCheck.executeQuery();
-
-            if (!rs.next()) {
+            // Online orders must exist in ca_online_orders. Frontend-generated ONL IDs are allowed.
+            if (!isFrontendOrder(orderID) && !onlineOrderExists(orderID)) {
                 System.out.println("Cash payment failed: order not found");
                 return false;
+            }
+
+            // Frontend ONL payments are persisted after sale_id is created in recordCustomerPurchase.
+            if (isFrontendOrder(orderID)) {
+                return true;
             }
 
             //insert payment
@@ -690,23 +707,100 @@ public void checkAndAutoUpdateAllAccounts() {
     
     @Override
 public boolean recordCustomerPurchase(int customerID, List<Object[]> saleItems, double totalAmount, String paymentMethod) {
-    System.out.println("Recording customer purchase");
-    System.out.println("Customer ID: " + customerID);
-    System.out.println("Total Amount: " + totalAmount);
-    System.out.println("Payment Method: " + paymentMethod);
-
-    if (saleItems != null) {
-        for (Object[] item : saleItems) {
-            Object productId = item.length > 0 ? item[0] : null;
-            Object quantity = item.length > 1 ? item[1] : null;
-            Object unitPrice = item.length > 2 ? item[2] : null;
-
-            System.out.println("Product ID: " + productId
-                    + ", Quantity: " + quantity
-                    + ", Unit Price: " + unitPrice);
-        }
+    if (saleItems == null || saleItems.isEmpty()) {
+        System.out.println("Sale recording failed: no sale items supplied");
+        return false;
     }
 
-    return true;
+    boolean previousAutoCommit = true;
+
+    try {
+        previousAutoCommit = conn.getAutoCommit();
+        conn.setAutoCommit(false);
+
+        int saleId = getNextId("ca_sales", "sale_id");
+        String saleSql = "INSERT INTO ca_sales (sale_id, customer_id, total_amount, payment_deferred, sale_source) VALUES (?, ?, ?, ?, ?)";
+        PreparedStatement salePs = conn.prepareStatement(saleSql);
+        salePs.setInt(1, saleId);
+
+        if (customerID > 0) {
+            salePs.setInt(2, customerID);
+        } else {
+            salePs.setNull(2, Types.INTEGER);
+        }
+
+        salePs.setDouble(3, totalAmount);
+        salePs.setInt(4, "CREDIT".equalsIgnoreCase(paymentMethod) || "ACCOUNT".equalsIgnoreCase(paymentMethod) ? 1 : 0);
+        salePs.setString(5, "IN_STORE");
+        salePs.executeUpdate();
+
+        String normalizedMethod = paymentMethod == null ? "UNKNOWN" : paymentMethod.trim().toUpperCase();
+        if ("CASH".equals(normalizedMethod) || "CARD".equals(normalizedMethod)) {
+            String paymentSql = "INSERT INTO ca_payments (payment_id, customer_id, sale_id, payment_method, amount) VALUES (?, ?, ?, ?, ?)";
+            PreparedStatement payPs = conn.prepareStatement(paymentSql);
+            payPs.setInt(1, getNextId("ca_payments", "payment_id"));
+
+            if (customerID > 0) {
+                payPs.setInt(2, customerID);
+            } else {
+                payPs.setNull(2, Types.INTEGER);
+            }
+
+            payPs.setInt(3, saleId);
+            payPs.setString(4, normalizedMethod);
+            payPs.setDouble(5, totalAmount);
+            payPs.executeUpdate();
+        }
+
+        int nextSaleItemId = getNextId("ca_sale_items", "sale_item_id");
+        String itemSql = "INSERT INTO ca_sale_items (sale_item_id, sale_id, product_id, quantity, unit_price) VALUES (?, ?, ?, ?, ?)";
+        PreparedStatement itemPs = conn.prepareStatement(itemSql);
+
+        int insertedItems = 0;
+
+        for (Object[] item : saleItems) {
+            if (item == null || item.length < 3 || !(item[0] instanceof Number)
+                    || !(item[1] instanceof Number) || !(item[2] instanceof Number)) {
+                continue;
+            }
+
+            int productId = ((Number) item[0]).intValue();
+            int quantity = ((Number) item[1]).intValue();
+            double unitPrice = ((Number) item[2]).doubleValue();
+
+            itemPs.setInt(1, nextSaleItemId++);
+            itemPs.setInt(2, saleId);
+            itemPs.setInt(3, productId);
+            itemPs.setInt(4, quantity);
+            itemPs.setDouble(5, unitPrice);
+            itemPs.addBatch();
+            insertedItems++;
+        }
+
+        if (insertedItems == 0) {
+            conn.rollback();
+            System.out.println("Sale recording failed: no valid items supplied");
+            return false;
+        }
+
+        itemPs.executeBatch();
+        conn.commit();
+        System.out.println("Sale recorded successfully. Sale ID: " + saleId + ", items: " + insertedItems);
+        return true;
+
+    } catch (SQLException e) {
+        try {
+            conn.rollback();
+        } catch (SQLException rollbackEx) {
+            rollbackEx.printStackTrace();
+        }
+        e.printStackTrace();
+        return false;
+    } finally {
+        try {
+            conn.setAutoCommit(previousAutoCommit);
+        } catch (SQLException ignored) {
+        }
+    }
 }
     }

@@ -243,20 +243,33 @@ public class NewOrder extends javax.swing.JDialog {
         javax.swing.table.DefaultTableModel model =
         (javax.swing.table.DefaultTableModel) jTableOrder.getModel();
 
-        String orderId = saOrdApi.newOrder();
-        String date = new java.text.SimpleDateFormat("dd/MM/yyyy").format(new java.util.Date());
-        String status = "Pending";
-
-        double totalCost = 0;
-        
         int rowCount = model.getRowCount();
+        if (rowCount == 0) {
+            javax.swing.JOptionPane.showMessageDialog(this, "Add at least one item before submitting.");
+            return;
+        }
+
+        String orderId = saOrdApi.newOrder();
+        double totalCost = 0;
+
         int[] itemIDs = new int[rowCount];
         int[] quantities = new int[rowCount];
 
         
         for (int i = 0; i < rowCount; i++) {
-        int productId = Integer.parseInt(model.getValueAt(i, 0).toString());
-        int quantity = Integer.parseInt(model.getValueAt(i, 1).toString());
+        int productId;
+        int quantity;
+
+        try {
+            productId = parseProductId(model.getValueAt(i, 0).toString());
+            quantity = Integer.parseInt(model.getValueAt(i, 1).toString());
+        } catch (NumberFormatException ex) {
+            javax.swing.JOptionPane.showMessageDialog(this,
+                "Invalid product ID or quantity on row " + (i + 1) + ".",
+                "Invalid Input",
+                javax.swing.JOptionPane.ERROR_MESSAGE);
+            return;
+        }
 
         itemIDs[i] = productId;
         quantities[i] = quantity;
@@ -273,18 +286,8 @@ public class NewOrder extends javax.swing.JDialog {
         saOrdApi.submitOrder(orderId);
 
 
-        for (int i = 0; i < rowCount; i++) {
-            String productId = model.getValueAt(i, 0).toString();
-            int quantity = Integer.parseInt(model.getValueAt(i, 1).toString());
-
-            ordersPanel.addOrderRow(new Object[]{
-                orderId,
-                date,
-                status,
-                productId,
-                quantity,
-                totalCost
-            });
+        if (ordersPanel != null) {
+            ordersPanel.refreshOrders();
         }
 
         this.dispose();
@@ -292,6 +295,14 @@ public class NewOrder extends javax.swing.JDialog {
         
         
     }//GEN-LAST:event_btnSubmitOrderActionPerformed
+
+    private int parseProductId(String value) {
+        String digitsOnly = value.replaceAll("\\D+", "");
+        if (digitsOnly.isEmpty()) {
+            throw new NumberFormatException("No numeric product id");
+        }
+        return Integer.parseInt(digitsOnly);
+    }
 
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
         int selectedRow = jTableOrder.getSelectedRow();

@@ -112,9 +112,7 @@ public class CA_OnlineOrderAPI_Impl implements CA_OnlineOrderAPI {
     }
 
     /**
-     * ============================
-     * CALCULATE ORDER TOTAL (IMPORTANT FIX)
-     * ============================
+     * CALCULATE ORDER TOTAL 
      */
     private double calculateOrderTotal(String orderID) {
 

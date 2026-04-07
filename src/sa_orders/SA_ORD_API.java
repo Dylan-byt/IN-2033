@@ -15,12 +15,21 @@ public class SA_ORD_API {
         this.conn = conn;
     }
 
+    private int getNextOnlineOrderItemId() throws SQLException {
+        String sql = "SELECT COALESCE(MAX(online_order_item_id), 0) + 1 AS next_id FROM ca_online_order_items";
+        PreparedStatement ps = conn.prepareStatement(sql);
+        ResultSet rs = ps.executeQuery();
+        return rs.next() ? rs.getInt("next_id") : 1;
+    }
+
     /**
      * Create new order
      */
     public String newOrder() {
-        // Generate a unique order ID using UUID
-        String orderID = UUID.randomUUID().toString();
+        // Generate a readable ONL order ID.
+        String orderID = "ONL-" + java.time.LocalDateTime.now()
+            .format(java.time.format.DateTimeFormatter.ofPattern("yyyyMMddHHmmss"))
+            + "-" + UUID.randomUUID().toString().substring(0, 6).toUpperCase();
 
         try {
             // sql to insert order into the database with the generated order ID and default processed status as false            
@@ -44,6 +53,8 @@ public class SA_ORD_API {
     public void addItems(String orderID, int[] itemIDs, int[] quantities) {
 
         try {
+            int nextItemId = getNextOnlineOrderItemId();
+
             //Loop through all items being added
             for (int i = 0; i < itemIDs.length; i++) {
 
@@ -53,8 +64,7 @@ public class SA_ORD_API {
                 String sql = "INSERT INTO ca_online_order_items (online_order_item_id, online_order_id, product_id, quantity) VALUES (?, ?, ?, ?)";
                 PreparedStatement ps = conn.prepareStatement(sql);
 
-                //so no id is the same as its a primary key and doesnt use auto increment
-                ps.setInt(1, (int)(Math.random() * 100000)); 
+                ps.setInt(1, nextItemId++);
                 ps.setString(2, orderID);
                 ps.setInt(3, itemIDs[i]);
                 ps.setInt(4, quantities[i]);
@@ -251,9 +261,18 @@ public class SA_ORD_API {
     public ResultSet getAllOrders() {
         
     try {
-        String query = "SELECT o.online_order_id, o.processed, i.product_id, i.quantity " +
-                       "FROM ca_online_orders o " +
-                       "JOIN ca_online_order_items i ON o.online_order_id = i.online_order_id";
+        String query =
+            "SELECT " +
+            "  o.online_order_id AS order_ref, " +
+            "  COALESCE(o.received_at, CURRENT_TIMESTAMP) AS order_date, " +
+            "  CASE WHEN o.processed = 1 THEN 'Processed' ELSE 'Pending' END AS status, " +
+            "  i.product_id AS product_id, " +
+            "  i.quantity AS quantity, " +
+            "  (i.quantity * COALESCE(p.price, 0)) AS total_cost " +
+            "FROM ca_online_orders o " +
+            "JOIN ca_online_order_items i ON o.online_order_id = i.online_order_id " +
+            "LEFT JOIN ca_products p ON p.product_id = i.product_id " +
+            "ORDER BY order_date DESC";
 
         PreparedStatement ps = conn.prepareStatement(query);
         return ps.executeQuery();

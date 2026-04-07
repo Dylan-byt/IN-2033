@@ -365,15 +365,17 @@ public class Orders extends javax.swing.JPanel {
             if (rs == null) return;
 
             while (rs.next()) {
-                String orderId = rs.getString("online_order_id");
-                String status = rs.getBoolean("processed") ? "Processed" : "Pending";
+                String orderId = rs.getString("order_ref");
+                String status = rs.getString("status");
                 int productId = rs.getInt("product_id");
                 int quantity = rs.getInt("quantity");
+                java.sql.Timestamp orderTimestamp = rs.getTimestamp("order_date");
 
-                String date = new java.text.SimpleDateFormat("dd/MM/yyyy")
-                              .format(new java.util.Date());
+                String date = orderTimestamp == null
+                    ? "-"
+                    : new java.text.SimpleDateFormat("dd/MM/yyyy").format(orderTimestamp);
 
-                double totalCost = quantity * 10;
+                double totalCost = rs.getDouble("total_cost");
 
                 model.addRow(new Object[]{
                     orderId,
@@ -388,6 +390,10 @@ public class Orders extends javax.swing.JPanel {
         } catch (Exception e) {
                 e.printStackTrace();
         }
+    }
+
+    public void refreshOrders() {
+        loadOrders();
     }
     
     
@@ -468,7 +474,107 @@ public class Orders extends javax.swing.JPanel {
                 "Please select an order to view the invoice of.");
             return;
         }
-        
+
+        String orderId = jOrdersTable.getValueAt(selectedRow, 0).toString();
+        String orderDate = jOrdersTable.getValueAt(selectedRow, 1).toString();
+        String status = jOrdersTable.getValueAt(selectedRow, 2).toString();
+        double totalCost = ((Number) jOrdersTable.getValueAt(selectedRow, 5)).doubleValue();
+
+        java.util.Map<String, Integer> items = saOrdApi.viewOrder(orderId);
+
+        // Build items table model
+        javax.swing.table.DefaultTableModel invoiceModel = new javax.swing.table.DefaultTableModel(
+            new Object[][] {},
+            new String[] {"Product", "Quantity"}
+        ) {
+            @Override public boolean isCellEditable(int row, int col) { return false; }
+        };
+
+        if (items.isEmpty()) {
+            invoiceModel.addRow(new Object[]{"(no item details available)", "-"});
+        } else {
+            for (java.util.Map.Entry<String, Integer> entry : items.entrySet()) {
+                invoiceModel.addRow(new Object[]{entry.getKey(), entry.getValue()});
+            }
+        }
+
+        javax.swing.JTable invoiceTable = new javax.swing.JTable(invoiceModel);
+        invoiceTable.setRowHeight(22);
+        invoiceTable.setEnabled(false);
+        invoiceTable.setFont(new java.awt.Font("Serif", java.awt.Font.PLAIN, 13));
+        invoiceTable.getTableHeader().setFont(new java.awt.Font("Serif", java.awt.Font.BOLD, 13));
+        invoiceTable.setShowGrid(true);
+        invoiceTable.setGridColor(java.awt.Color.DARK_GRAY);
+
+        javax.swing.JScrollPane tableScrollPane = new javax.swing.JScrollPane(invoiceTable);
+        tableScrollPane.setBorder(javax.swing.BorderFactory.createLineBorder(java.awt.Color.DARK_GRAY));
+        tableScrollPane.setPreferredSize(new java.awt.Dimension(400, 130));
+
+        javax.swing.JLabel titleLabel = new javax.swing.JLabel("9.7 Appendix 7: Order Invoice");
+        titleLabel.setFont(new java.awt.Font("SansSerif", java.awt.Font.BOLD, 18));
+
+        javax.swing.JLabel briefLabel = new javax.swing.JLabel("InfoPharma ORDERING SYSTEM: STUDENT'S BRIEF");
+        briefLabel.setFont(new java.awt.Font("SansSerif", java.awt.Font.PLAIN, 11));
+
+        javax.swing.JPanel headerPanel = new javax.swing.JPanel(new java.awt.BorderLayout());
+        headerPanel.setOpaque(false);
+        headerPanel.add(titleLabel, java.awt.BorderLayout.WEST);
+        headerPanel.add(briefLabel, java.awt.BorderLayout.EAST);
+
+        javax.swing.JTextArea detailsArea = new javax.swing.JTextArea(
+            "Order Reference: " + orderId + "\n" +
+            "Order Date:       " + orderDate + "\n" +
+            "Status:           " + status
+        );
+        detailsArea.setEditable(false);
+        detailsArea.setOpaque(false);
+        detailsArea.setFont(new java.awt.Font("Serif", java.awt.Font.PLAIN, 14));
+
+        javax.swing.JLabel totalLabel = new javax.swing.JLabel(
+            String.format("Total: £%.2f", totalCost), javax.swing.SwingConstants.RIGHT
+        );
+        totalLabel.setFont(new java.awt.Font("Serif", java.awt.Font.BOLD, 14));
+        totalLabel.setBorder(javax.swing.BorderFactory.createCompoundBorder(
+            javax.swing.BorderFactory.createLineBorder(java.awt.Color.DARK_GRAY),
+            javax.swing.BorderFactory.createEmptyBorder(4, 8, 4, 8)
+        ));
+
+        javax.swing.JPanel totalsRow = new javax.swing.JPanel(new java.awt.FlowLayout(java.awt.FlowLayout.RIGHT, 0, 0));
+        totalsRow.setOpaque(false);
+        totalsRow.add(totalLabel);
+
+        javax.swing.JPanel tablePanel = new javax.swing.JPanel(new java.awt.BorderLayout());
+        tablePanel.setOpaque(false);
+        tablePanel.add(tableScrollPane, java.awt.BorderLayout.CENTER);
+        tablePanel.add(totalsRow, java.awt.BorderLayout.SOUTH);
+
+        javax.swing.JTextArea closingArea = new javax.swing.JTextArea(
+            "\nThank you for your order. This confirms your purchase from InfoPharma.\n\nYours sincerely,\n\nJ. Faith"
+        );
+        closingArea.setEditable(false);
+        closingArea.setOpaque(false);
+        closingArea.setFont(new java.awt.Font("Serif", java.awt.Font.PLAIN, 13));
+        closingArea.setBorder(javax.swing.BorderFactory.createEmptyBorder(10, 0, 0, 0));
+
+        javax.swing.JPanel panel = new javax.swing.JPanel();
+        panel.setLayout(new javax.swing.BoxLayout(panel, javax.swing.BoxLayout.Y_AXIS));
+        panel.setBackground(java.awt.Color.WHITE);
+        panel.setBorder(javax.swing.BorderFactory.createEmptyBorder(16, 18, 16, 18));
+        panel.add(headerPanel);
+        panel.add(javax.swing.Box.createVerticalStrut(20));
+        panel.add(detailsArea);
+        panel.add(javax.swing.Box.createVerticalStrut(14));
+        panel.add(tablePanel);
+        panel.add(javax.swing.Box.createVerticalStrut(10));
+        panel.add(closingArea);
+
+        javax.swing.JOptionPane.showMessageDialog(
+            this,
+            panel,
+            "Order Invoice",
+            javax.swing.JOptionPane.INFORMATION_MESSAGE
+        );
+
     }//GEN-LAST:event_jButton2ActionPerformed
 
     private void btnPlaceOrderActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnPlaceOrderActionPerformed
@@ -483,6 +589,9 @@ public class Orders extends javax.swing.JPanel {
 
     dialog.setLocationRelativeTo(parentWindow);
     dialog.setVisible(true);
+
+    // Reload from DB after modal closes so newly submitted orders are shown.
+    refreshOrders();
 
     }//GEN-LAST:event_btnPlaceOrderActionPerformed
 

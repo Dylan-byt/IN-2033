@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 import merchant.SA_Merchant_API;
 import merchant.SA_Merchant_API_Impl;
+import sa_orders.SA_ORD_API;
 
 /**
  *
@@ -28,6 +29,7 @@ public class Sales extends javax.swing.JPanel {
     private String cardNumberForBackend = "";
     private String cardExpiryForBackend = "";
     private final SA_Merchant_API merchantAPI = new SA_Merchant_API_Impl(DBConnection.getConnection());
+    private final SA_ORD_API saOrdApi = new SA_ORD_API(DBConnection.getConnection());
 
     /**
      * Creates new form Sales
@@ -661,8 +663,14 @@ public class Sales extends javax.swing.JPanel {
         }
 
         double totalAmount = parseCurrency(jLabel22.getText());
-        callPaymentBackend(totalAmount);
+        // Block sale completion unless payment step succeeds.
+        boolean paymentOk = callPaymentBackend(totalAmount);
+        if (!paymentOk) {
+            javax.swing.JOptionPane.showMessageDialog(this, "Payment failed. Sale was not completed.");
+            return;
+        }
 
+        // Temporary hook to pass sale item payload to backend until final DB write design is confirmed.
         boolean recorded = merchantAPI.recordCustomerPurchase(
             getSelectedCustomerId(),
             buildSaleItemsForBackend(model),
@@ -674,6 +682,8 @@ public class Sales extends javax.swing.JPanel {
             javax.swing.JOptionPane.showMessageDialog(this, "Sale could not be recorded.");
             return;
         }
+
+        mirrorSaleInOrdersTable(model);
 
         showRetailInvoice();
 
@@ -689,23 +699,47 @@ public class Sales extends javax.swing.JPanel {
         updateSummary();
     }
 
-    private void callPaymentBackend(double totalAmount) {
+    private void mirrorSaleInOrdersTable(javax.swing.table.DefaultTableModel model) {
+        int rowCount = model.getRowCount();
+        if (rowCount == 0) {
+            return;
+        }
+
+        int[] itemIDs = new int[rowCount];
+        int[] quantities = new int[rowCount];
+
+        for (int i = 0; i < rowCount; i++) {
+            itemIDs[i] = parseIdNumber(String.valueOf(model.getValueAt(i, 0)));
+            quantities[i] = Integer.parseInt(String.valueOf(model.getValueAt(i, 2)));
+        }
+
+        String orderId = saOrdApi.newOrder();
+        saOrdApi.addItems(orderId, itemIDs, quantities);
+        saOrdApi.submitOrder(orderId);
+    }
+
+    private boolean callPaymentBackend(double totalAmount) {
         String paymentMethod = String.valueOf(jComboBox5.getSelectedItem());
         String posOrderId = generateFrontendOrderId();
 
         if ("Card".equalsIgnoreCase(paymentMethod)) {
-            merchantAPI.processCardPayment(posOrderId, cardNumberForBackend, cardExpiryForBackend, totalAmount);
-        } else if ("Cash".equalsIgnoreCase(paymentMethod)) {
-            merchantAPI.processCashPayment(posOrderId, totalAmount);
-        } else if ("Account".equalsIgnoreCase(paymentMethod) || "Credit".equalsIgnoreCase(paymentMethod)) {
-            merchantAPI.processCreditPayment(getSelectedCustomerId(), totalAmount);
-        } else {
-            System.out.println("No matching backend payment method for: " + paymentMethod);
+            return merchantAPI.processCardPayment(posOrderId, cardNumberForBackend, cardExpiryForBackend, totalAmount);
         }
+
+        if ("Cash".equalsIgnoreCase(paymentMethod)) {
+            return merchantAPI.processCashPayment(posOrderId, totalAmount);
+        }
+
+        if ("Account".equalsIgnoreCase(paymentMethod) || "Credit".equalsIgnoreCase(paymentMethod)) {
+            return merchantAPI.processCreditPayment(getSelectedCustomerId(), totalAmount);
+        }
+
+        System.out.println("No matching backend payment method for: " + paymentMethod);
+        return false;
     }
 
     private String generateFrontendOrderId() {
-        return "POS-" + java.time.LocalDateTime.now()
+        return "ONL-" + java.time.LocalDateTime.now()
             .format(java.time.format.DateTimeFormatter.ofPattern("yyyyMMddHHmmss"))
             + "-" + java.util.UUID.randomUUID().toString().substring(0, 8).toUpperCase();
     }
