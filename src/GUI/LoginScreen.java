@@ -190,8 +190,8 @@ public class LoginScreen extends javax.swing.JFrame {
         
        
         //uncomment line below for proper authentication
-        //Boolean authenticated = loginApi.login(username, password);
-        Boolean authenticated = true;
+        Boolean authenticated = loginApi.login(username, password);
+        
         
         if (authenticated){
         //if (username.equals("Username") && password.equals("Password")){//temporary
