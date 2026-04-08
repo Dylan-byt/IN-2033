@@ -11,8 +11,10 @@ package GUI;
  */
 
 import sa_orders.SA_ORD_API;
+import customer.CustomerAPI_Impl;
 import database.DBConnection;
 import java.util.Map;
+import login.SA_LOGIN_API;
 //import ca_online_orders.CA_OnlineOrderAPI_Impl;
 
 
@@ -20,6 +22,8 @@ public class Orders extends javax.swing.JPanel {
 
     private static int orderCounter = 1;
     private SA_ORD_API saOrdApi;
+    private SA_LOGIN_API loginApi;
+    private CustomerAPI_Impl customerApi;
     //private CA_OnlineOrderAPI_Impl orderApi;
     
     
@@ -40,8 +44,11 @@ public class Orders extends javax.swing.JPanel {
         */
         
         saOrdApi = new SA_ORD_API(database.DBConnection.getConnection());
+        loginApi = new SA_LOGIN_API();
+        customerApi = new CustomerAPI_Impl();
         loadOrders();
         loadCatalogue();
+        //loadLoggedInBalance();
         
         
         
@@ -434,6 +441,19 @@ public class Orders extends javax.swing.JPanel {
         }
 
 }
+
+    /* code for balance
+    private void loadLoggedInBalance() {
+        try {
+            String username = loginApi.getCurrentLoggedInUsername();
+            double balance = customerApi.getOutstandingBalanceByUsername(username);
+            jLabel3.setText(String.format("£%.2f", balance));
+        } catch (Exception e) {
+            jLabel3.setText("£0.00");
+            e.printStackTrace();
+        }
+    }
+    */
     
     
     public static String generateOrderID(){
