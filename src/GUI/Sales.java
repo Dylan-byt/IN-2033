@@ -954,7 +954,7 @@ public class Sales extends javax.swing.JPanel {
 
         return "Payment Method: " + paymentDetails
             + "\n\nThank you for your valued custom. We look forward to receiving your payment in due course."
-            + "\n\nYours sincerely,\n\nJ. Faith";
+            + "\n\nYours sincerely,\n\nPharmaTech";
     }
 
     private javax.swing.JPanel buildTotalsPanel() {

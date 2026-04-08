@@ -12,6 +12,7 @@ package GUI;
 
 import sa_orders.SA_ORD_API;
 import database.DBConnection;
+import java.util.Map;
 //import ca_online_orders.CA_OnlineOrderAPI_Impl;
 
 
@@ -399,49 +400,39 @@ public class Orders extends javax.swing.JPanel {
     
     
     private void loadCatalogue() {
-        //THIS USES THE WRONG PRODUCT CATALOGUE, CALATOGUE NEEDS TO BE RETRIEVED FROM SA
-        /*
         try {
             javax.swing.table.DefaultTableModel model =
                 (javax.swing.table.DefaultTableModel) jCatalogueTable.getModel();
             model.setRowCount(0);
 
-            
-            String[] catalogueItems = orderApi.getMerchantCatalogue(""); 
+            Map<Integer, String> catalogueItems = saOrdApi.getCatalogue();
 
-            for (String item : catalogueItems) {
-                String[] parts = item.split(" - ", 2); 
-                model.addRow(new Object[]{parts[0], parts[1]});
+            for (Map.Entry<Integer, String> item : catalogueItems.entrySet()) {
+                model.addRow(new Object[]{item.getKey(), item.getValue()});
             }
 
         } catch (Exception e) {
             e.printStackTrace();
         }
-        */
     }
     
     
     private void searchCatalogue(String searchText) {
-        //THIS USES THE WRONG PRODUCT CATALOGUE, CALATOGUE NEEDS TO BE RETRIEVED FROM SA
-        /*
         try {
             javax.swing.table.DefaultTableModel model
                     = (javax.swing.table.DefaultTableModel) jCatalogueTable.getModel();
             model.setRowCount(0);
 
-            String[] catalogueItems = orderApi.getMerchantCatalogue(searchText);
+            Map<Integer, String> catalogueItems = saOrdApi.searchCatalogue(searchText);
 
-            for (String item : catalogueItems) {
-                String[] parts = item.split(" - ", 2);
-                model.addRow(new Object[]{parts[0], parts[1]});
+            for (Map.Entry<Integer, String> item : catalogueItems.entrySet()) {
+                model.addRow(new Object[]{item.getKey(), item.getValue()});
             }
 
         } catch (Exception e) {
             e.printStackTrace();
         }
 
-        */
-        
 }
     
     
@@ -549,7 +540,7 @@ public class Orders extends javax.swing.JPanel {
         tablePanel.add(totalsRow, java.awt.BorderLayout.SOUTH);
 
         javax.swing.JTextArea closingArea = new javax.swing.JTextArea(
-            "\nThank you for your order. This confirms your purchase from InfoPharma.\n\nYours sincerely,\n\nJ. Faith"
+            "\nThank you for your order. This confirms your purchase from InfoPharma.\n\nYours sincerely,\n\nPharmaTech"
         );
         closingArea.setEditable(false);
         closingArea.setOpaque(false);
