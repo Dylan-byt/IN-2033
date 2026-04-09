@@ -1,18 +1,24 @@
 package stock;
 
+import main.java.PU_COMMS_API;
+import main.java.PU_COMMS_API_Impl;
+
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-
 public class CA_Stock_API_Impl {
 
-    private Connection conn;
-    private PU_COMMS_API puCommsApi;
+    private final Connection conn;
+    private final PU_COMMS_API puCommsApi;
+
+    public CA_Stock_API_Impl(Connection conn) {
+        this(conn, new PU_COMMS_API_Impl());
+    }
 
     public CA_Stock_API_Impl(Connection conn, PU_COMMS_API puCommsApi) {
         this.conn = conn;
-        this.puCommsApi = puCommsApi;
+        this.puCommsApi = puCommsApi != null ? puCommsApi : new PU_COMMS_API_Impl();
     }
 
     /**
@@ -225,6 +231,10 @@ public class CA_Stock_API_Impl {
     /**
      * RECORD DELIVERY (increase stock from SA)
      */
+    public boolean recordDelivery(int productId, int quantity) {
+        return recordDelivery(productId, quantity, null);
+    }
+
     public boolean recordDelivery(int productId, int quantity, String email) {
         if (conn == null) return false;
 
@@ -246,7 +256,7 @@ public class CA_Stock_API_Impl {
             if (rows > 0) {
                 System.out.println("Delivery recorded: +" + quantity + " for product " + productId);
                 // Sending email details to PU here
-                if (puCommsApi != null) {
+                if (puCommsApi != null && email != null && !email.isBlank()) {
                     String subject = "Stock Delivery Recorded";
                     String content = "<html><body>"
                             + "<h3>Stock Delivery Update</h3>"

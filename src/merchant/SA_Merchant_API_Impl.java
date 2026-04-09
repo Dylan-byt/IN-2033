@@ -1,6 +1,7 @@
 package merchant;
 
-
+import main.java.PU_COMMS_API;
+import main.java.PU_COMMS_API_Impl;
 
 import java.sql.*;
 import java.time.LocalDate;
@@ -12,13 +13,18 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-
 public class SA_Merchant_API_Impl implements SA_Merchant_API {
 
-    private Connection conn;
+    private final Connection conn;
+    private final PU_COMMS_API puCommsApi;
 
     public SA_Merchant_API_Impl(Connection conn) {
+        this(conn, new PU_COMMS_API_Impl());
+    }
+
+    public SA_Merchant_API_Impl(Connection conn, PU_COMMS_API puCommsApi) {
         this.conn = conn;
+        this.puCommsApi = puCommsApi != null ? puCommsApi : new PU_COMMS_API_Impl();
     }
 
     private boolean isFrontendOrder(String orderID) {

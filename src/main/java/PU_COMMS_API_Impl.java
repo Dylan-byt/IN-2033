@@ -1,14 +1,25 @@
-import java.util.Map;
+package main.java;
+
+import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
+import java.util.Map;
+
 public class PU_COMMS_API_Impl implements PU_COMMS_API {
-    private String puApiEndpoint;
+    private static final String DEFAULT_PU_API_ENDPOINT = "http://localhost:8084";
+
+    private final String puApiEndpoint;
+
+    public PU_COMMS_API_Impl() {
+        this(DEFAULT_PU_API_ENDPOINT);
+    }
 
     public PU_COMMS_API_Impl(String puApiEndpoint) {
         // No SMTP credentials needed since PU is handling sending
-        this.puApiEndpoint = puApiEndpoint;
-
+        this.puApiEndpoint = (puApiEndpoint == null || puApiEndpoint.isBlank())
+                ? DEFAULT_PU_API_ENDPOINT
+                : puApiEndpoint;
     }
 
     /**
@@ -25,7 +36,6 @@ public class PU_COMMS_API_Impl implements PU_COMMS_API {
                     "content", content
             );
 
-
             System.out.println("Email data handed off to PU subsystem: " + emailData);
             return true;
 
@@ -34,6 +44,49 @@ public class PU_COMMS_API_Impl implements PU_COMMS_API {
             return false;
         }
     }
+
+    /*
+     * REST API replacement version for sendEmail().
+     *
+     * Incase we need to switch it out and Dylan isnt there use the commented code below and switch it out
+     * 1) comment out the current live sendEmail() method above
+     * 2) uncomment this whole method
+     * 3) make sure the PU service has POST /sendEmail running on localhost:8084 or alter it to whatever the correct endpoint is
+     *
+     * @Override
+     * public boolean sendEmail(String recipient, String subject, String content) {
+     *     try {
+     *         String payload = String.format(
+     *                 "{\"recipient\":\"%s\",\"subject\":\"%s\",\"content\":\"%s\"}",
+     *                 recipient.replace("\"", "\\\""),
+     *                 subject.replace("\"", "\\\""),
+     *                 content.replace("\"", "\\\"").replace("\n", "\\n")
+     *         );
+     *
+     *         URL url = new URL(puApiEndpoint + "/sendEmail");
+     *         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+     *         conn.setRequestMethod("POST");
+     *         conn.setRequestProperty("Content-Type", "application/json");
+     *         conn.setDoOutput(true);
+     *
+     *         try (OutputStream os = conn.getOutputStream()) {
+     *             os.write(payload.getBytes(StandardCharsets.UTF_8));
+     *         }
+     *
+     *         int responseCode = conn.getResponseCode();
+     *         if (responseCode == 200) {
+     *             return true;
+     *         } else {
+     *             System.out.println("PU email API returned error code: " + responseCode);
+     *             return false;
+     *         }
+     *
+     *     } catch (Exception e) {
+     *         e.printStackTrace();
+     *         return false;
+     *     }
+     * }
+     */
 
     public boolean processCardPayment(String cardNumber, String expiry, double amount, String orderID) {
         try {
@@ -52,7 +105,7 @@ public class PU_COMMS_API_Impl implements PU_COMMS_API {
 
             // Sending encrypted payload
             try (OutputStream os = conn.getOutputStream()) {
-                os.write(payload.getBytes("UTF-8"));
+                os.write(payload.getBytes(StandardCharsets.UTF_8));
             }
 
             // Checking PU response
