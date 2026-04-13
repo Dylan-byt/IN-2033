@@ -148,3 +148,30 @@ public class MockSubsystemCA {
         return items;
     }
 }
+
+/*
+# Health
+curl -i http://localhost:8082/health
+
+# Search: "para"
+curl -i "http://localhost:8082/api/ipos_ca/catalogue?search=para"
+
+# Search: "cardiovascular"
+curl -i "http://localhost:8082/api/ipos_ca/catalogue?search=cardiovascular"
+
+# Search: no results expected
+curl -i "http://localhost:8082/api/ipos_ca/catalogue?search=zzzz"
+ */
+
+/*
+curl.exe -i http://localhost:8082/health
+curl.exe -i http://localhost:8082/api/ipos_ca/health
+curl.exe -i "http://localhost:8082/api/ipos_ca/catalogue?search="
+Gets all items in the catalogue.
+curl.exe -i "http://localhost:8082/api/ipos_ca/catalogue?search=para"
+Gets items with "para" in the name or category.
+curl.exe -i "http://localhost:8082/api/ipos_ca/catalogue?search=cardiovascular"
+Gets items with "cardiovascular" in the name or category.
+curl.exe -i "http://localhost:8082/api/ipos_ca/catalogue?search=zzzz"
+Gets no items, as "zzzz" does not match any name or category.
+ */

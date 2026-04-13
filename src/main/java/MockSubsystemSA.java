@@ -1,5 +1,7 @@
 package main.java;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.javalin.Javalin;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -8,11 +10,16 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import stock.CA_Stock_API_Impl;
 import database.DBConnection;
 
 public class MockSubsystemSA {
 
+    private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final Pattern PRODUCT_ID_PATTERN = Pattern.compile("['\"]?product_id['\"]?\\s*:\\s*(\\d+)", Pattern.CASE_INSENSITIVE);
+    private static final Pattern QUANTITY_PATTERN = Pattern.compile("['\"]?quantity['\"]?\\s*:\\s*(\\d+)", Pattern.CASE_INSENSITIVE);
     private static volatile boolean started = false;
 
     public static synchronized void startInBackground() {
@@ -74,16 +81,57 @@ public class MockSubsystemSA {
 
         // Namespaced SA route (similar style to other subsystem mocks)
         app.post("/api/ipos_sa/delivery", ctx -> {
-            handleDelivery(ctx.bodyAsClass(Map.class), stockApi, ctx);
+            handleDeliveryRequest(stockApi, ctx);
         });
 
         // Backward-compatible route already used in your tests/curl commands
         app.post("/api/stock/delivery", ctx -> {
-            handleDelivery(ctx.bodyAsClass(Map.class), stockApi, ctx);
+            handleDeliveryRequest(stockApi, ctx);
         });
 
         started = true;
         System.out.println("SA stock delivery API system started successfully on port " + port + ".");
+    }
+
+    private static void handleDeliveryRequest(CA_Stock_API_Impl stockApi, io.javalin.http.Context ctx) {
+        try {
+            String rawBody = ctx.body();
+            if (rawBody == null || rawBody.isBlank()) {
+                ctx.status(400).json(Map.of("status", "failed", "error", "invalid payload"));
+                return;
+            }
+
+            Map<String, Object> body = parseDeliveryBody(rawBody);
+            handleDelivery(body, stockApi, ctx);
+        } catch (Exception e) {
+            e.printStackTrace();
+            ctx.status(400).json(Map.of("status", "failed", "error", "invalid payload"));
+        }
+    }
+
+    private static Map<String, Object> parseDeliveryBody(String rawBody) throws Exception {
+        String bodyText = rawBody.trim();
+
+        // Some clients can send surrounding single quotes; normalize before parsing.
+        if (bodyText.length() >= 2 && bodyText.startsWith("'") && bodyText.endsWith("'")) {
+            bodyText = bodyText.substring(1, bodyText.length() - 1).trim();
+        }
+
+        try {
+            return MAPPER.readValue(bodyText, new TypeReference<Map<String, Object>>() {});
+        } catch (Exception ignored) {
+            Matcher productMatcher = PRODUCT_ID_PATTERN.matcher(bodyText);
+            Matcher quantityMatcher = QUANTITY_PATTERN.matcher(bodyText);
+
+            if (productMatcher.find() && quantityMatcher.find()) {
+                Map<String, Object> parsed = new LinkedHashMap<>();
+                parsed.put("product_id", Integer.parseInt(productMatcher.group(1)));
+                parsed.put("quantity", Integer.parseInt(quantityMatcher.group(1)));
+                return parsed;
+            }
+
+            throw ignored;
+        }
     }
 
     private static void handleDelivery(Map<String, Object> body, CA_Stock_API_Impl stockApi, io.javalin.http.Context ctx) {
@@ -139,3 +187,27 @@ public class MockSubsystemSA {
         }
     }
 }
+
+/*
+# Health
+curl -i http://localhost:8083/health
+
+# Check item appears in SA catalogue
+curl -i "http://localhost:8083/api/stock/catalogue?search=para"
+
+# Delivery via backward-compatible route
+curl -i -X POST "http://localhost:8083/api/stock/delivery" \
+  -H "Content-Type: application/json" \
+  --data-raw '{"product_id":1,"quantity":5}'
+
+# Delivery via namespaced route
+curl -i -X POST "http://localhost:8083/api/ipos_sa/delivery" \
+  -H "Content-Type: application/json" \
+  --data-raw '{"product_id":1,"quantity":5}'
+*/
+
+/*
+curl.exe -i -X POST "http://localhost:8083/api/stock/delivery" -H "Content-Type: application/json" --data-raw '{"product_id":1,"quantity":5}'
+curl.exe -i -X POST "http://localhost:8083/api/ipos_sa/delivery" -H "Content-Type: application/json" --data-raw '{"product_id":1,"quantity":5}'
+What i used exactly to get the delivery to go through
+*/
