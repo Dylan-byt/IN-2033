@@ -181,6 +181,29 @@ public String getUserRole(String username) {
     return null;
 }
 
+    public boolean hasAnyRole(String username, String... roles) {
+        String userRole = getUserRole(username);
+        if (userRole == null || roles == null) {
+            return false;
+        }
+
+        for (String role : roles) {
+            if (role != null && userRole.equalsIgnoreCase(role)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public boolean isManagerRole(String username) {
+        return hasAnyRole(username, "Manager", "Director of Operations");
+    }
+
+    public boolean isAdminOrManagerRole(String username) {
+        return hasAnyRole(username, "Admin", "Manager", "Director of Operations");
+    }
+
     /**
      * LOAD ALL USERS FOR MANAGE STAFF TABLE
      */

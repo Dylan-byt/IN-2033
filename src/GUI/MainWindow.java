@@ -33,16 +33,16 @@ public MainWindow() {
     contentPanel.add(new Dashboard(), java.awt.BorderLayout.CENTER);
     
     loginApi = new SA_LOGIN_API();
-    
-    
-    
-
-        
-        
-        
-        
     }
 
+    private boolean canAccessManageStaff() {
+        return loginApi.isAdminOrManagerRole(loginApi.getCurrentLoggedInUsername());
+    }
+
+    private boolean canAccessTemplates() {
+        return loginApi.isManagerRole(loginApi.getCurrentLoggedInUsername());
+    }
+    
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -279,9 +279,7 @@ public MainWindow() {
     }//GEN-LAST:event_btnCustomersActionPerformed
 
     private void btnStaffActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnStaffActionPerformed
-        String userRole = loginApi.getUserRole(loginApi.getCurrentLoggedInUsername());
-        System.out.println(userRole);
-        if (userRole.equalsIgnoreCase("Admin") || userRole.equalsIgnoreCase("Manager")){
+        if (canAccessManageStaff()) {
             contentPanel.removeAll();
             contentPanel.add(new ManageStaff(), java.awt.BorderLayout.CENTER);
             contentPanel.revalidate();
@@ -305,8 +303,7 @@ public MainWindow() {
     }//GEN-LAST:event_btnOnlineOrdersActionPerformed
 
     private void btnTemplatesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnTemplatesActionPerformed
-    String userRole = loginApi.getUserRole(loginApi.getCurrentLoggedInUsername());
-    if (userRole == null || !userRole.equalsIgnoreCase("Manager")) {
+    if (!canAccessTemplates()) {
         javax.swing.JOptionPane.showMessageDialog(this,
             "Access denied. Only managers can access templates.");
         return;
