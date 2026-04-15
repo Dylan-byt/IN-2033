@@ -366,6 +366,7 @@ public class NewOrder extends javax.swing.JDialog {
             0.0
         });
         ordersPanel.refreshOrders();
+        ordersPanel.refreshBalance();
     }
 
     javax.swing.JOptionPane.showMessageDialog(
