@@ -8,6 +8,15 @@ import java.net.URLEncoder;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Objects;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.net.URI;
+import java.time.Duration;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.io.IOException;
+import com.fasterxml.jackson.databind.JsonNode;
 
 /**
  * Dedicated client for CA -> SA HTTP communication.
@@ -16,6 +25,7 @@ import java.util.Objects;
 public class SA_COMMS_API_Impl {
 
     private static final String DEFAULT_SA_API_BASE = "http://localhost:8081/api/ipos_sa";
+        private static final String BASE_URL = "http://localhost:8081";
 
     private final String saApiBase;
 
@@ -136,20 +146,32 @@ public class SA_COMMS_API_Impl {
         }
     }
 
-    private String getRaw(String path, String queryString, String operation) {
-        try {
-            String endpoint = buildUrl(path + normalizeQuery(queryString));
-            HttpResult result = send("GET", endpoint, null);
-            if (!result.isSuccess()) {
-                logHttpFailure(operation, endpoint, result);
-                return null;
-            }
-            return result.responseBody;
-        } catch (Exception e) {
-            e.printStackTrace();
+private String getRaw(String path, String queryString, String operation) {
+    
+    String endpoint = buildUrl(path + normalizeQuery(queryString));
+
+
+    System.out.println("SA GET request: " + endpoint);
+    System.out.println("Query string: " + queryString);
+
+    try {
+        HttpResult result = doGet(endpoint);
+
+        System.out.println("SA GET status: " + result.responseCode);
+        System.out.println("SA GET body: " + result.responseBody);
+
+        if (result.responseCode != 200) {
+            logHttpFailure(operation, endpoint, result);
             return null;
         }
+
+        return result.responseBody;
+
+    } catch (Exception e) {
+        logException(operation, endpoint, e);
+        return null;
     }
+}
 
     private HttpResult send(String method, String endpointUrl, String payload) throws Exception {
         URL url = new URL(endpointUrl);
@@ -257,6 +279,15 @@ public class SA_COMMS_API_Impl {
             System.out.println("SA API response body: " + result.responseBody);
         }
     }
+    
+    private HttpResult doGet(String endpoint) throws Exception {
+    return send("GET", endpoint, null);
+}
+    
+private void logException(String operation, String endpoint, Exception e) {
+    System.out.println("ERROR in " + operation + " -> " + endpoint);
+    e.printStackTrace();
+}   
 
     private static final class HttpResult {
         private final int responseCode;

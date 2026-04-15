@@ -10,28 +10,49 @@ package GUI;
  * @author mehzanazkhan
  */
 
-import sa_orders.SA_ORD_API;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import customer.CustomerAPI_Impl;
-import database.DBConnection;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import login.SA_LOGIN_API;
-//import ca_online_orders.CA_OnlineOrderAPI_Impl;
+import main.java.SA_COMMS_API_Impl;
+import sa_orders.SA_ORD_API;
 
 
 public class Orders extends javax.swing.JPanel {
 
     private static int orderCounter = 1;
     private SA_ORD_API saOrdApi;
+    private SA_COMMS_API_Impl saCommsApi;
     private SA_LOGIN_API loginApi;
     private CustomerAPI_Impl customerApi;
-    //private CA_OnlineOrderAPI_Impl orderApi;
-    
+
+    public Orders() {
+       initComponents();
+
+    saOrdApi = new SA_ORD_API(database.DBConnection.getConnection());
+    saCommsApi = new SA_COMMS_API_Impl();
+    loginApi = new SA_LOGIN_API();
+    customerApi = new CustomerAPI_Impl();
+
+    loadOrders();
+    loadCatalogue();
+    loadLoggedInBalance();
+
+    jCatalogueSearchBar.addKeyListener(new java.awt.event.KeyAdapter() {
+        public void keyReleased(java.awt.event.KeyEvent evt) {
+            searchCatalogue(jCatalogueSearchBar.getText());
+        }
+    });
+}
+
+
     
     /**
      * Creates new form Orders
      */
-    public Orders() {
-        initComponents();
+
         
         //THIS USES THE WRONG API
         /*
@@ -43,26 +64,7 @@ public class Orders extends javax.swing.JPanel {
         );
         */
         
-        
-        saOrdApi = new SA_ORD_API(database.DBConnection.getConnection());
-        loginApi = new SA_LOGIN_API();
-        customerApi = new CustomerAPI_Impl();
-        loadOrders();
-        loadCatalogue();
-        loadLoggedInBalance();
-        
-        
-        
-        jCatalogueSearchBar.addKeyListener(new java.awt.event.KeyAdapter() {
-        public void keyReleased(java.awt.event.KeyEvent evt) {
-            searchCatalogue(jCatalogueSearchBar.getText());
-        }
-        });
-        
-        
-        
-        
-    }
+
 
     
     
@@ -406,53 +408,76 @@ public class Orders extends javax.swing.JPanel {
     
     
     
-    private void loadCatalogue() {
-        try {
-            javax.swing.table.DefaultTableModel model =
-                (javax.swing.table.DefaultTableModel) jCatalogueTable.getModel();
-            model.setRowCount(0);
+private void loadCatalogue() {
+    try {
+        javax.swing.table.DefaultTableModel model =
+            (javax.swing.table.DefaultTableModel) jCatalogueTable.getModel();
+        model.setRowCount(0);
 
-            Map<Integer, String> catalogueItems = saOrdApi.getCatalogue();
+String jsonResponse = saCommsApi.getActiveCatalogue("username=cosymed");
+System.out.println("RAW catalogue response: " + jsonResponse);
 
-            for (Map.Entry<Integer, String> item : catalogueItems.entrySet()) {
-                model.addRow(new Object[]{item.getKey(), item.getValue()});
-            }
+if (jsonResponse == null || jsonResponse.isBlank()) {
+    javax.swing.JOptionPane.showMessageDialog(this,
+        "No catalogue data returned from SA.");
+    return;
+}
 
-        } catch (Exception e) {
-            e.printStackTrace();
+Map<Integer, String> catalogueItems = parseCatalogueResponse(jsonResponse);
+System.out.println("Parsed catalogue size: " + catalogueItems.size());
+
+        for (Map.Entry<Integer, String> item : catalogueItems.entrySet()) {
+            model.addRow(new Object[]{item.getKey(), item.getValue()});
         }
+
+    } catch (Exception e) {
+        e.printStackTrace();
+        javax.swing.JOptionPane.showMessageDialog(this,
+            "Failed to load SA catalogue: " + e.getMessage());
     }
+}
     
     
-    private void searchCatalogue(String searchText) {
-        try {
-            javax.swing.table.DefaultTableModel model
-                    = (javax.swing.table.DefaultTableModel) jCatalogueTable.getModel();
-            model.setRowCount(0);
+private void searchCatalogue(String searchText) {
+    try {
+        javax.swing.table.DefaultTableModel model =
+            (javax.swing.table.DefaultTableModel) jCatalogueTable.getModel();
+        model.setRowCount(0);
 
-            Map<Integer, String> catalogueItems = saOrdApi.searchCatalogue(searchText);
+        String jsonResponse = saCommsApi.getActiveCatalogue("username=cosymed");
 
-            for (Map.Entry<Integer, String> item : catalogueItems.entrySet()) {
-                model.addRow(new Object[]{item.getKey(), item.getValue()});
-            }
-
-        } catch (Exception e) {
-            e.printStackTrace();
+        if (jsonResponse == null || jsonResponse.isBlank()) {
+            return;
         }
 
+        Map<Integer, String> catalogueItems = parseCatalogueResponse(jsonResponse);
+
+        String search = searchText == null ? "" : searchText.trim().toLowerCase();
+
+        for (Map.Entry<Integer, String> item : catalogueItems.entrySet()) {
+            String productName = item.getValue() == null ? "" : item.getValue().toLowerCase();
+
+            if (search.isBlank() || productName.contains(search)) {
+                model.addRow(new Object[]{item.getKey(), item.getValue()});
+            }
+        }
+
+    } catch (Exception e) {
+        e.printStackTrace();
+    }
 }
 
     //code for balance
-    private void loadLoggedInBalance() {
-        try {
-            String username = loginApi.getCurrentLoggedInUsername();
-            double balance = customerApi.getOutstandingBalanceByUsername(username);
-            jLabel3.setText(String.format("£%.2f", balance));
-        } catch (Exception e) {
-            jLabel3.setText("£0.00");
-            e.printStackTrace();
-        }
+private void loadLoggedInBalance() {
+    try {
+        String response = saCommsApi.getBalance("username=cosymed");
+        System.out.println("SA balance response: " + response);
+        jLabel3.setText(response);
+    } catch (Exception e) {
+        jLabel3.setText("£0.00");
+        e.printStackTrace();
     }
+}
     
     
     
@@ -614,6 +639,58 @@ public class Orders extends javax.swing.JPanel {
     
 
     }//GEN-LAST:event_btnPlaceOrderActionPerformed
+
+private Map<Integer, String> parseCatalogueResponse(String jsonResponse) {
+    Map<Integer, String> result = new LinkedHashMap<>();
+
+    try {
+        ObjectMapper mapper = new ObjectMapper();
+        JsonNode root = mapper.readTree(jsonResponse);
+
+        JsonNode itemIds = root.get("item_id");
+        JsonNode descriptions = root.get("description");
+
+        if (itemIds != null && descriptions != null && itemIds.isArray() && descriptions.isArray()) {
+            int count = Math.min(itemIds.size(), descriptions.size());
+
+            for (int i = 0; i < count; i++) {
+                int productId = itemIds.get(i).asInt();
+                String productName = descriptions.get(i).asText();
+
+                result.put(productId, productName);
+            }
+        }
+
+    } catch (Exception e) {
+        e.printStackTrace();
+    }
+
+    return result;
+}
+
+private int extractInt(JsonNode node, String... keys) {
+    for (String key : keys) {
+        if (node.has(key) && !node.get(key).isNull()) {
+            try {
+                return node.get(key).asInt();
+            } catch (Exception ignored) {
+            }
+        }
+    }
+    return 0;
+}
+
+private String extractString(JsonNode node, String... keys) {
+    for (String key : keys) {
+        if (node.has(key) && !node.get(key).isNull()) {
+            try {
+                return node.get(key).asText();
+            } catch (Exception ignored) {
+            }
+        }
+    }
+    return "";
+}
 
 
 

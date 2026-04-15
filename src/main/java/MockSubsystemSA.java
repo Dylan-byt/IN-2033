@@ -1,21 +1,23 @@
 package main.java;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.javalin.Javalin;
+import java.io.IOException;
 import java.math.BigDecimal;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.Timestamp;
-import java.util.ArrayList;
+import java.net.URI;
+import java.net.URLEncoder;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
-import database.DBConnection;
 
 public class MockSubsystemSA {
-
+    
+    
     private static final ObjectMapper MAPPER = new ObjectMapper();
     private static final String BASE_URL = "http://localhost:8081";
 
@@ -274,27 +276,21 @@ public class MockSubsystemSA {
         }
     }
 
-    public static String readActiveCatalogue(String username) {
-        try {
-            ensureStarted();
+public static String readActiveCatalogue() {
+    try {
+        ensureStarted();
 
-            if (username == null || username.isBlank()) {
-                return "Get catalogue failed: username is required";
-            }
+        HttpResponse<String> response = get("/api/ipos_sa/sa_ord_api/getActiveCatalogue");
 
-            HttpResponse<String> response = get(
-                    "/api/ipos_sa/sa_ord_api/getActiveCatalogue?username=" + encode(username)
-            );
-
-            if (response.statusCode() != 200) {
-                return "Get catalogue failed: HTTP " + response.statusCode() + " - " + response.body();
-            }
-
-            return response.body();
-        } catch (Exception e) {
-            return "Get catalogue failed: " + e.getMessage();
+        if (response.statusCode() != 200) {
+            return "Get catalogue failed: HTTP " + response.statusCode() + " - " + response.body();
         }
+
+        return response.body();
+    } catch (Exception e) {
+        return "Get catalogue failed: " + e.getMessage();
     }
+}
 
     private static HttpResponse<String> get(String path) throws IOException, InterruptedException {
         HttpRequest request = HttpRequest.newBuilder()

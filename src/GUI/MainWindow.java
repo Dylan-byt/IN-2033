@@ -59,7 +59,6 @@ public MainWindow() {
         btnOrders = new javax.swing.JButton();
         btnLogout = new javax.swing.JButton();
         lbMenu = new javax.swing.JLabel();
-        jLabel1 = new javax.swing.JLabel();
         btnReports = new javax.swing.JButton();
         btnCustomers = new javax.swing.JButton();
         btnStaff = new javax.swing.JButton();
@@ -119,9 +118,6 @@ public MainWindow() {
         lbMenu.setForeground(new java.awt.Color(255, 255, 255));
         lbMenu.setText("Pharmacy System");
 
-        jLabel1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/logomini.png"))); // NOI18N
-        jLabel1.setText("jLabel1");
-
         btnReports.setBackground(new java.awt.Color(0, 0, 51));
         btnReports.setFont(new java.awt.Font("Helvetica Neue", 1, 20)); // NOI18N
         btnReports.setForeground(new java.awt.Color(255, 255, 255));
@@ -179,23 +175,17 @@ public MainWindow() {
             .addComponent(btnReports, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
             .addComponent(btnTemplates, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, sidebarPanelLayout.createSequentialGroup()
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addContainerGap(40, Short.MAX_VALUE)
                 .addComponent(lbMenu, javax.swing.GroupLayout.PREFERRED_SIZE, 228, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(27, 27, 27))
             .addGroup(sidebarPanelLayout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(btnStaff, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-            .addGroup(sidebarPanelLayout.createSequentialGroup()
-                .addGap(31, 31, 31)
-                .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 228, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(36, Short.MAX_VALUE))
         );
         sidebarPanelLayout.setVerticalGroup(
             sidebarPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(sidebarPanelLayout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 53, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGap(65, 65, 65)
                 .addComponent(lbMenu, javax.swing.GroupLayout.PREFERRED_SIZE, 39, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
                 .addComponent(btnDashboard, javax.swing.GroupLayout.PREFERRED_SIZE, 61, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -353,7 +343,6 @@ public MainWindow() {
     private javax.swing.JButton btnStock;
     private javax.swing.JButton btnTemplates;
     private javax.swing.JPanel contentPanel;
-    private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel lbMenu;
     private javax.swing.JPanel sidebarPanel;
     // End of variables declaration//GEN-END:variables

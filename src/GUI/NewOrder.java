@@ -17,13 +17,14 @@ package GUI;
 import sa_orders.SA_ORD_API;
 import database.DBConnection;
 import main.java.PU_COMMS_API_Impl;
+import main.java.SA_COMMS_API_Impl;
 
 
 public class NewOrder extends javax.swing.JDialog {
     
     private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(NewOrder.class.getName());
     private Orders ordersPanel;
-    private final SA_ORD_API saOrdApi;
+    private final SA_COMMS_API_Impl saApi;
     private final PU_COMMS_API_Impl puCommsApi;
 
 
@@ -38,7 +39,7 @@ public class NewOrder extends javax.swing.JDialog {
         initComponents();
         
         
-        saOrdApi = new SA_ORD_API(DBConnection.getConnection());
+        saApi = new SA_COMMS_API_Impl();
         puCommsApi = new PU_COMMS_API_Impl();
         System.out.println("NewOrder dialog initialized.");
 
@@ -243,70 +244,124 @@ public class NewOrder extends javax.swing.JDialog {
     }//GEN-LAST:event_txtProductIDActionPerformed
 
     private void btnSubmitOrderActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSubmitOrderActionPerformed
-        
-        javax.swing.table.DefaultTableModel model =
+                                           
+    javax.swing.table.DefaultTableModel model =
         (javax.swing.table.DefaultTableModel) jTableOrder.getModel();
 
-        int rowCount = model.getRowCount();
-        if (rowCount == 0) {
-            javax.swing.JOptionPane.showMessageDialog(this, "Add at least one item before submitting.");
-            return;
-        }
+    int rowCount = model.getRowCount();
+    if (rowCount == 0) {
+        javax.swing.JOptionPane.showMessageDialog(this, "Add at least one item.");
+        return;
+    }
 
-        String orderId = saOrdApi.newOrder();
-        double totalCost = 0;
+    int[] itemIDs = new int[rowCount];
+    int[] quantities = new int[rowCount];
 
-        int[] itemIDs = new int[rowCount];
-        int[] quantities = new int[rowCount];
-
-        
-        for (int i = 0; i < rowCount; i++) {
-        int productId;
-        int quantity;
-
+    for (int i = 0; i < rowCount; i++) {
         try {
-            productId = parseProductId(model.getValueAt(i, 0).toString());
-            quantity = Integer.parseInt(model.getValueAt(i, 1).toString());
+            itemIDs[i] = parseProductId(model.getValueAt(i, 0).toString());
+            quantities[i] = Integer.parseInt(model.getValueAt(i, 1).toString());
         } catch (NumberFormatException ex) {
-            javax.swing.JOptionPane.showMessageDialog(this,
+            javax.swing.JOptionPane.showMessageDialog(
+                this,
                 "Invalid product ID or quantity on row " + (i + 1) + ".",
                 "Invalid Input",
-                javax.swing.JOptionPane.ERROR_MESSAGE);
+                javax.swing.JOptionPane.ERROR_MESSAGE
+            );
             return;
         }
 
-        itemIDs[i] = productId;
-        quantities[i] = quantity;
-
-
-        double price = 10; //currently missing a get product price from backend
-        totalCost += price * quantity;
-        }
-
-
-        saOrdApi.addItems(orderId, itemIDs, quantities);
-
-
-        saOrdApi.submitOrder(orderId);
-
-        String customerEmail = javax.swing.JOptionPane.showInputDialog(this, "Enter customer email for order confirmation:");
-        System.out.println("Customer email entered: " + customerEmail);
-        if (customerEmail != null && !customerEmail.isBlank()) {
-            puCommsApi.sendEmail(
-                customerEmail,
-                "Order Confirmation - " + orderId,
-                "Your order " + orderId + " has been submitted successfully."
+        if (quantities[i] <= 0) {
+            javax.swing.JOptionPane.showMessageDialog(
+                this,
+                "Quantity must be above 0 on row " + (i + 1) + ".",
+                "Invalid Quantity",
+                javax.swing.JOptionPane.ERROR_MESSAGE
             );
+            return;
+        }
+    }
+
+    java.math.BigDecimal[] qtyArray = new java.math.BigDecimal[rowCount];
+    for (int i = 0; i < rowCount; i++) {
+        qtyArray[i] = new java.math.BigDecimal(quantities[i]);
+    }
+
+    String username = "cosymed";
+
+    System.out.println("Submitting order to SA...");
+    System.out.println("Username: " + username);
+
+    String orderResponse = saApi.newOrder(username);
+    System.out.println("SA newOrder returned: " + orderResponse);
+
+    if (orderResponse == null || orderResponse.isBlank()) {
+        javax.swing.JOptionPane.showMessageDialog(this, "Failed to create order in SA.");
+        return;
+    }
+
+    String orderId;
+    try {
+        com.fasterxml.jackson.databind.ObjectMapper mapper =
+            new com.fasterxml.jackson.databind.ObjectMapper();
+        com.fasterxml.jackson.databind.JsonNode root = mapper.readTree(orderResponse);
+
+        if (root.get("orderId") == null || root.get("orderId").asText().isBlank()) {
+            javax.swing.JOptionPane.showMessageDialog(this, "SA response did not contain a valid orderId.");
+            return;
         }
 
-        if (ordersPanel != null) {
-            ordersPanel.refreshOrders();
-        }
+        orderId = root.get("orderId").asText();
+    } catch (Exception e) {
+        e.printStackTrace();
+        javax.swing.JOptionPane.showMessageDialog(this, "Failed to parse order ID from SA response.");
+        return;
+    }
 
-        this.dispose();
-        
-        
-        
+    System.out.println("Parsed SA orderId: " + orderId);
+
+    boolean added = saApi.addItems(orderId, itemIDs, qtyArray);
+    System.out.println("SA addItems returned: " + added);
+
+    if (!added) {
+        javax.swing.JOptionPane.showMessageDialog(this, "Failed to add items to SA order.");
+        return;
+    }
+
+    boolean submitted = saApi.submitOrder(orderId);
+    System.out.println("SA submitOrder returned: " + submitted);
+
+    if (!submitted) {
+        javax.swing.JOptionPane.showMessageDialog(this, "Failed to submit order to SA.");
+        return;
+    }
+
+    int totalQuantity = 0;
+    for (int q : quantities) {
+        totalQuantity += q;
+    }
+
+    String today = new java.text.SimpleDateFormat("dd/MM/yyyy").format(new java.util.Date());
+
+    if (ordersPanel != null) {
+        ordersPanel.addOrderRow(new Object[]{
+            orderId,
+            today,
+            "Submitted to SA",
+            itemIDs[0],
+            totalQuantity,
+            0.0
+        });
+        ordersPanel.refreshOrders();
+    }
+
+    javax.swing.JOptionPane.showMessageDialog(
+        this,
+        "Order submitted successfully!\nSA Order ID: " + orderId
+    );
+
+    this.dispose();
+
     }//GEN-LAST:event_btnSubmitOrderActionPerformed
 
     private int parseProductId(String value) {
@@ -347,6 +402,8 @@ public class NewOrder extends javax.swing.JDialog {
     /**
      * @param args the command line arguments
      */
+    
+
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
