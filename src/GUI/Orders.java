@@ -691,10 +691,13 @@ private String parseOrderStatusResponse(String jsonResponse) {
 
 private void recordDeliveredOrderLocally(String orderId) {
     try {
-        // Replace this with your teammate's actual local status update / delivery-record method
-        // Example:
-        // saOrdApi.updateOrderStatus(orderId, "delivered");
-        System.out.println("Record delivery locally for order: " + orderId);
+        // Record delivery in local database
+        boolean success = saOrdApi.recordDelivery(orderId);
+        if (success) {
+            System.out.println("Delivery recorded locally for order: " + orderId);
+        } else {
+            System.out.println("Failed to record delivery for order: " + orderId);
+        }
     } catch (Exception e) {
         e.printStackTrace();
     }

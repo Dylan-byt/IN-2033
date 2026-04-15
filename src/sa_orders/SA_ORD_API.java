@@ -278,6 +278,37 @@ public class SA_ORD_API {
         return catalogueApi.getCatalogue(searchTerm);
     }
 
+    /**
+     * Update order status (e.g., delivered)
+     */
+    public boolean updateOrderStatus(String orderID, String status) {
+        try {
+            String sql = "UPDATE ca_online_orders SET processed = ? WHERE online_order_id = ?";
+            PreparedStatement ps = conn.prepareStatement(sql);
+            
+            // Map status to processed flag (or extend table if needed for more statuses)
+            boolean processed = status.equalsIgnoreCase("delivered") || status.equalsIgnoreCase("processed");
+            ps.setBoolean(1, processed);
+            ps.setString(2, orderID);
+            
+            int result = ps.executeUpdate();
+            if (result > 0) {
+                System.out.println("Order status updated: " + orderID + " -> " + status);
+                return true;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    /**
+     * Record order delivery
+     */
+    public boolean recordDelivery(String orderID) {
+        return updateOrderStatus(orderID, "delivered");
+    }
+
     
     
     
