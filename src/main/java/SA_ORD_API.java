@@ -253,6 +253,7 @@ public SA_ORD_API(Connection conn) {
     }
     
 public Map<Integer, Integer> getOrderItems(String orderID) {
+    System.out.println("getOrderItems called for order: " + orderID);
     Map<Integer, Integer> items = new HashMap<>();
 
     try {

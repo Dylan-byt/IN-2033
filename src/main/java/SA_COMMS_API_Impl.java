@@ -37,6 +37,12 @@ public class SA_COMMS_API_Impl {
         this.saApiBase = normalizeBase(saApiBase);
     }
 
+    private static final java.net.CookieManager cookieManager = new java.net.CookieManager();
+
+static {
+    java.net.CookieHandler.setDefault(cookieManager);
+}
+    
     /**
      * GET /sa_ord_api/newOrder?username=...
      */
@@ -305,4 +311,26 @@ private void logException(String operation, String endpoint, Exception e) {
             return responseCode >= 200 && responseCode < 300;
         }
     }
+    
+    public boolean login(String username, String password) {
+    try {
+        String endpoint = buildUrl("/sa_login_api/login");
+
+        String payload = "{"
+                + "\"username\":\"" + escapeJson(username) + "\","
+                + "\"password\":\"" + escapeJson(password) + "\""
+                + "}";
+
+        HttpResult result = send("POST", endpoint, payload);
+
+        System.out.println("SA LOGIN status: " + result.responseCode);
+        System.out.println("SA LOGIN body: " + result.responseBody);
+
+        return result.responseCode == 200;
+
+    } catch (Exception e) {
+        e.printStackTrace();
+        return false;
+    }
+}
 }
