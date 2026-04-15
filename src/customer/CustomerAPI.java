@@ -42,6 +42,8 @@ public interface CustomerAPI {
     void updateReminderStatuses() throws Exception;
     
     int generateReminders() throws Exception;
+
+    java.util.List<String> generateReminders(String accountId) throws Exception;
     
     void clearReminderStatusesIfPaid(String accountId) throws Exception;
 

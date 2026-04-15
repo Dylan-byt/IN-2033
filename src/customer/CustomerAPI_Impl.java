@@ -8,8 +8,11 @@ import database.DBConnection;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import templates.TemplateAPI;
+import templates.TemplateAPI_Impl;
 
 /**
  *
@@ -72,8 +75,7 @@ public boolean addCustomer(String firstName,
 
         
         String sql = "SELECT customer_id, firstname, surname, email, phone, credit_limit, " +
-             "outstanding_balance, account_status, status_1stReminder, status_2ndReminder, " +
-             "date_1stReminder, date_2ndReminder " +
+             "outstanding_balance, account_status " +
              "FROM ca_customers";
 
         try (Connection conn = DBConnection.getConnection();
@@ -86,23 +88,17 @@ public boolean addCustomer(String firstName,
 
             while (rs.next()) {
                 int customerId = rs.getInt("customer_id");
-                
-            
 
-customers.add(new Customer(
-    formatAccountId(customerId),
-    rs.getString("firstname"),
-    rs.getString("surname"),
-    rs.getString("email"),
-    rs.getString("phone"),
-    rs.getDouble("credit_limit"),
-    rs.getString("account_status"),
-    rs.getDouble("outstanding_balance"),
-    rs.getString("status_1stReminder"),
-    rs.getString("status_2ndReminder"),
-    rs.getString("date_1stReminder"),
-    rs.getString("date_2ndReminder")
-));
+                customers.add(new Customer(
+                    formatAccountId(customerId),
+                    rs.getString("firstname"),
+                    rs.getString("surname"),
+                    rs.getString("email"),
+                    rs.getString("phone"),
+                    rs.getDouble("credit_limit"),
+                    rs.getString("account_status"),
+                    rs.getDouble("outstanding_balance")
+                ));
             }
         }
 
@@ -299,69 +295,27 @@ public String getDiscountPlan(String accountId) throws Exception {
 
 @Override
 public void updateReminderStatuses() throws Exception {
-    String firstSql =
-        "UPDATE ca_customers " +
-        "SET status_1stReminder = 'due' " +
-        "WHERE account_holder = 1 " +
-        "AND outstanding_balance > 0 " +
-        "AND account_status = 'SUSPENDED' " +
-        "AND (status_1stReminder IS NULL OR status_1stReminder = 'no_need')";
-
-    String secondSql =
-        "UPDATE ca_customers " +
-        "SET status_2ndReminder = 'due' " +
-        "WHERE account_holder = 1 " +
-        "AND outstanding_balance > 0 " +
-        "AND account_status = 'IN_DEFAULT' " +
-        "AND (status_2ndReminder IS NULL OR status_2ndReminder = 'no_need')";
-
-    try (Connection conn = DBConnection.getConnection();
-         PreparedStatement ps1 = conn.prepareStatement(firstSql);
-         PreparedStatement ps2 = conn.prepareStatement(secondSql)) {
-
-        if (conn == null) {
-            throw new Exception("Database connection failed.");
-        }
-
-        ps1.executeUpdate();
-        ps2.executeUpdate();
-    }
+    // Reminder state is tracked only in ca_payment_reminders.
+    // This method is retained for compatibility but does not rely on database fields
+    // that are not present in the current schema.
 }
 
 @Override
 public int generateReminders() throws Exception {
     int count = 0;
+    TemplateAPI templateAPI = new TemplateAPI_Impl();
+    String firstTemplate = templateAPI.getTemplate("reminder_first");
+    String secondTemplate = templateAPI.getTemplate("reminder_second");
+    String pharmacyName = templateAPI.getTemplate("pharmacy_name");
+    String pharmacyAddress = safeTemplateFetch(templateAPI, "pharmacy_address");
+    String pharmacyEmail = safeTemplateFetch(templateAPI, "pharmacy_email");
+    String pharmacyPhone = safeTemplateFetch(templateAPI, "pharmacy_phone");
 
-
-    updateReminderStatuses();
-
-    String firstSelect =
-        "SELECT customer_id FROM ca_customers " +
-        "WHERE status_1stReminder = 'due'";
-
-    String firstInsert =
-        "INSERT INTO ca_payment_reminders (reminder_id, customer_id, reminder_type, generated_at, status) " +
-        "VALUES (?, ?, 'FIRST', datetime('now'), 'GENERATED')";
-
-    String firstUpdate =
-        "UPDATE ca_customers " +
-        "SET status_1stReminder = 'sent', date_2ndReminder = date('now', '+15 days') " +
-        "WHERE customer_id = ?";
-
-    String secondSelect =
-        "SELECT customer_id FROM ca_customers " +
-        "WHERE status_2ndReminder = 'due' " +
-        "AND date_2ndReminder IS NOT NULL " +
-        "AND date(date_2ndReminder) <= date('now')";
-
-    String secondInsert =
-        "INSERT INTO ca_payment_reminders (reminder_id, customer_id, reminder_type, generated_at, status) " +
-        "VALUES (?, ?, 'SECOND', datetime('now'), 'GENERATED')";
-
-    String secondUpdate =
-        "UPDATE ca_customers " +
-        "SET status_2ndReminder = 'sent' " +
-        "WHERE customer_id = ?";
+    String sql =
+        "SELECT customer_id, firstname, surname, outstanding_balance, account_status " +
+        "FROM ca_customers " +
+        "WHERE outstanding_balance > 0 " +
+        "AND account_status IN ('SUSPENDED', 'IN_DEFAULT')";
 
     String maxIdSql = "SELECT COALESCE(MAX(reminder_id), 0) + 1 AS next_id FROM ca_payment_reminders";
 
@@ -378,41 +332,26 @@ public int generateReminders() throws Exception {
             }
         }
 
-        try (PreparedStatement psSelect = conn.prepareStatement(firstSelect);
-             ResultSet rs = psSelect.executeQuery();
-             PreparedStatement psInsert = conn.prepareStatement(firstInsert);
-             PreparedStatement psUpdate = conn.prepareStatement(firstUpdate)) {
+        try (PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
 
             while (rs.next()) {
                 int customerId = rs.getInt("customer_id");
+                String status = rs.getString("account_status");
+                String customerName = rs.getString("firstname") + " " + rs.getString("surname");
+                double outstandingBalance = rs.getDouble("outstanding_balance");
 
-                psInsert.setInt(1, nextId++);
-                psInsert.setInt(2, customerId);
-                psInsert.executeUpdate();
-
-                psUpdate.setInt(1, customerId);
-                psUpdate.executeUpdate();
-
-                count++;
-            }
-        }
-
-        try (PreparedStatement psSelect = conn.prepareStatement(secondSelect);
-             ResultSet rs = psSelect.executeQuery();
-             PreparedStatement psInsert = conn.prepareStatement(secondInsert);
-             PreparedStatement psUpdate = conn.prepareStatement(secondUpdate)) {
-
-            while (rs.next()) {
-                int customerId = rs.getInt("customer_id");
-
-                psInsert.setInt(1, nextId++);
-                psInsert.setInt(2, customerId);
-                psInsert.executeUpdate();
-
-                psUpdate.setInt(1, customerId);
-                psUpdate.executeUpdate();
-
-                count++;
+                if ("SUSPENDED".equalsIgnoreCase(status)) {
+                    if (!reminderExists(conn, customerId, "FIRST")) {
+                        insertReminder(conn, nextId++, customerId, "FIRST");
+                        count++;
+                    }
+                } else if ("IN_DEFAULT".equalsIgnoreCase(status)) {
+                    if (!reminderExists(conn, customerId, "SECOND")) {
+                        insertReminder(conn, nextId++, customerId, "SECOND");
+                        count++;
+                    }
+                }
             }
         }
     }
@@ -420,31 +359,149 @@ public int generateReminders() throws Exception {
     return count;
 }
 
-
 @Override
-public void clearReminderStatusesIfPaid(String accountId) throws Exception {
+public java.util.List<String> generateReminders(String accountId) throws Exception {
     int customerId = parseCustomerId(accountId);
+    TemplateAPI templateAPI = new TemplateAPI_Impl();
+    String firstTemplate = templateAPI.getTemplate("reminder_first");
+    String secondTemplate = templateAPI.getTemplate("reminder_second");
+    String pharmacyName = templateAPI.getTemplate("pharmacy_name");
+    String pharmacyAddress = safeTemplateFetch(templateAPI, "pharmacy_address");
+    String pharmacyEmail = safeTemplateFetch(templateAPI, "pharmacy_email");
+    String pharmacyPhone = safeTemplateFetch(templateAPI, "pharmacy_phone");
 
-    String sql =
-        "UPDATE ca_customers " +
-        "SET status_1stReminder = 'no_need', " +
-        "    status_2ndReminder = 'no_need', " +
-        "    date_1stReminder = NULL, " +
-        "    date_2ndReminder = NULL " +
-        "WHERE customer_id = ? " +
-        "AND outstanding_balance <= 0 " +
-        "AND account_status != 'IN_DEFAULT'";
+    List<String> reminders = new ArrayList<>();
 
-    try (Connection conn = DBConnection.getConnection();
-         PreparedStatement ps = conn.prepareStatement(sql)) {
+    String customerSql =
+        "SELECT firstname, surname, outstanding_balance, account_status " +
+        "FROM ca_customers WHERE customer_id = ?";
 
+    String maxIdSql = "SELECT COALESCE(MAX(reminder_id), 0) + 1 AS next_id FROM ca_payment_reminders";
+
+    try (Connection conn = DBConnection.getConnection()) {
         if (conn == null) {
             throw new Exception("Database connection failed.");
         }
 
+        int nextId = 1;
+        try (PreparedStatement ps = conn.prepareStatement(maxIdSql);
+             ResultSet rs = ps.executeQuery()) {
+            if (rs.next()) {
+                nextId = rs.getInt("next_id");
+            }
+        }
+
+        try (PreparedStatement ps = conn.prepareStatement(customerSql)) {
+            ps.setInt(1, customerId);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    String customerName = rs.getString("firstname") + " " + rs.getString("surname");
+                    double outstandingBalance = rs.getDouble("outstanding_balance");
+                    String accountStatus = rs.getString("account_status");
+
+                    if ("SUSPENDED".equalsIgnoreCase(accountStatus)) {
+                        if (!reminderExists(conn, customerId, "FIRST")) {
+                            insertReminder(conn, nextId++, customerId, "FIRST");
+                            reminders.add(buildReminderText(
+                                firstTemplate,
+                                customerName,
+                                formatAccountId(customerId),
+                                outstandingBalance,
+                                pharmacyName,
+                                pharmacyAddress,
+                                pharmacyEmail,
+                                pharmacyPhone,
+                                LocalDate.now().plusDays(7).toString()));
+                        }
+                    } else if ("IN_DEFAULT".equalsIgnoreCase(accountStatus)) {
+                        if (!reminderExists(conn, customerId, "SECOND")) {
+                            insertReminder(conn, nextId++, customerId, "SECOND");
+                            reminders.add(buildReminderText(
+                                secondTemplate,
+                                customerName,
+                                formatAccountId(customerId),
+                                outstandingBalance,
+                                pharmacyName,
+                                pharmacyAddress,
+                                pharmacyEmail,
+                                pharmacyPhone,
+                                LocalDate.now().toString()));
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    return reminders;
+}
+
+private String buildReminderText(String template,
+                                 String customerName,
+                                 String accountId,
+                                 double outstandingBalance,
+                                 String pharmacyName,
+                                 String pharmacyAddress,
+                                 String pharmacyEmail,
+                                 String pharmacyPhone,
+                                 String dueDate) {
+    if (template == null) {
+        template = "";
+    }
+
+    String balanceValue = String.format("£%.2f", outstandingBalance);
+
+    return template
+        .replace("{customer_name}", customerName)
+        .replace("{account_id}", accountId)
+        .replace("{balance}", balanceValue)
+        .replace("{due_amount}", balanceValue)
+        .replace("{pharmacy_name}", pharmacyName)
+        .replace("{pharmacy_address}", pharmacyAddress)
+        .replace("{pharmacy_email}", pharmacyEmail)
+        .replace("{pharmacy_phone}", pharmacyPhone)
+        .replace("{due_date}", dueDate == null ? "" : dueDate);
+}
+
+private boolean reminderExists(Connection conn, int customerId, String reminderType) throws Exception {
+    String sql = "SELECT 1 FROM ca_payment_reminders WHERE customer_id = ? AND reminder_type = ? LIMIT 1";
+
+    try (PreparedStatement ps = conn.prepareStatement(sql)) {
         ps.setInt(1, customerId);
+        ps.setString(2, reminderType);
+
+        try (ResultSet rs = ps.executeQuery()) {
+            return rs.next();
+        }
+    }
+}
+
+private void insertReminder(Connection conn, int reminderId, int customerId, String reminderType) throws Exception {
+    String insertSql = "INSERT INTO ca_payment_reminders (reminder_id, customer_id, reminder_type, generated_at, status) " +
+                       "VALUES (?, ?, ?, datetime('now'), 'GENERATED')";
+
+    try (PreparedStatement ps = conn.prepareStatement(insertSql)) {
+        ps.setInt(1, reminderId);
+        ps.setInt(2, customerId);
+        ps.setString(3, reminderType);
         ps.executeUpdate();
     }
+}
+
+private String safeTemplateFetch(TemplateAPI templateAPI, String key) {
+    try {
+        return templateAPI.getTemplate(key);
+    } catch (Exception e) {
+        return "";
+    }
+}
+
+@Override
+public void clearReminderStatusesIfPaid(String accountId) throws Exception {
+    // No reminder-status columns exist in the current customer schema.
+    // Reminder delivery is tracked only in ca_payment_reminders, so this method
+    // is a no-op for the current database design.
 }
 
 @Override
