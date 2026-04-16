@@ -114,7 +114,11 @@ public class MockSubsystemCA {
     }
 
     private static List<Map<String, Object>> readCatalogue(Connection conn, String search) {
+<<<<<<< HEAD
         String sql = "SELECT CAST(p.product_id AS TEXT) AS item_id, "
+=======
+        String sql = "SELECT CAST(p.product_id AS TEXT) AS item_id, p.product_name,"
+>>>>>>> 50d15a37c34670010669fecc640ca3724b0220c9
                 + "p.price, COALESCE(s.quantity, 0) AS stock_level, COALESCE(p.product_type, '') AS category "
                 + "FROM ca_products p LEFT JOIN ca_stock s ON s.product_id = p.product_id "
                 + "WHERE LOWER(p.product_name) LIKE ? OR LOWER(COALESCE(p.product_type, '')) LIKE ? "
