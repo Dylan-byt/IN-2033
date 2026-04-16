@@ -14,8 +14,8 @@ import merchant.SA_Merchant_API_Impl;
 import sa_orders.SA_ORD_API;
 import templates.TemplateAPI;
 import templates.TemplateAPI_Impl;
-// OPTIONAL: Import for dynamic product loading from database
-// import stock.CA_Stock_API_Impl;
+
+import stock.CA_Stock_API_Impl;
 
 /**
  *
@@ -30,8 +30,8 @@ public class Sales extends javax.swing.JPanel {
         {"P003", "Cough Syrup", "6.80"},
         {"P004", "Vitamin C Tablets", "8.10"}
     };
-    // OPTIONAL: Use dynamic product list instead of hardcoded array
-    // private List<Object[]> productCatalog = new ArrayList<>();
+ 
+    private List<Object[]> productCatalog = new ArrayList<>();
     
     private boolean cardDetailsCaptured;
     private String cardSummary = "";
@@ -41,8 +41,8 @@ public class Sales extends javax.swing.JPanel {
     private final SA_ORD_API saOrdApi = new SA_ORD_API(DBConnection.getConnection());
     private final TemplateAPI templateAPI = new TemplateAPI_Impl();
     private final PU_COMMS_API_Impl puCommsApi = new PU_COMMS_API_Impl();
-    // OPTIONAL: Add this to enable database product loading
-    // private final CA_Stock_API_Impl stockApi = new CA_Stock_API_Impl(DBConnection.getConnection());
+    
+    private final CA_Stock_API_Impl stockApi = new CA_Stock_API_Impl(DBConnection.getConnection());
 
     /**
      * Creates new form Sales
@@ -547,6 +547,7 @@ public class Sales extends javax.swing.JPanel {
         repaint();
     }
 
+    /*
     private void initialiseSalesPage() {
         jComboBox1.removeAllItems();
         for (String[] product : PRODUCT_CATALOG) {
@@ -567,14 +568,10 @@ public class Sales extends javax.swing.JPanel {
         jTable1.getTableHeader().setReorderingAllowed(false);
         updateAccountIdVisibility();
         updateSummary();
-    }
+    }*/
     
-    /*
-     * OPTIONAL: Alternative implementation to load products dynamically from database
-     * To use this, uncomment and replace the above initialiseSalesPage() method.
-     * Also uncomment the stockApi field and CA_Stock_API_Impl import above.
-     * 
-    private void initialiseSalesPage_Dynamic() {
+    
+    private void initialiseSalesPage() {
         // Load products from database
         productCatalog.clear();
         jComboBox1.removeAllItems();
@@ -614,8 +611,8 @@ public class Sales extends javax.swing.JPanel {
         updateAccountIdVisibility();
         updateSummary();
     }
-     */
-
+    
+    /*
     private void addSelectedItemToSale() {
         int selectedIndex = jComboBox1.getSelectedIndex();
         if (selectedIndex < 0) {
@@ -660,14 +657,11 @@ public class Sales extends javax.swing.JPanel {
         jTextField1.setText("1");
         jLabel7.setText(model.getRowCount() + " item(s) recorded in this sale.");
         updateSummary();
-    }
-
-    /*
-     * OPTIONAL: Alternative implementation to work with dynamic product list from database
-     * To use this, uncomment and replace the above addSelectedItemToSale() method.
-     * Also uncomment the productCatalog field and CA_Stock_API_Impl import at the top.
-     * 
-    private void addSelectedItemToSale_Dynamic() {
+    }*/
+   
+//do omsthing
+    
+    private void addSelectedItemToSale() {
         int selectedIndex = jComboBox1.getSelectedIndex();
         if (selectedIndex < 0) {
             javax.swing.JOptionPane.showMessageDialog(this, "Select a product to add.");
@@ -720,7 +714,7 @@ public class Sales extends javax.swing.JPanel {
         jLabel7.setText(model.getRowCount() + " item(s) recorded in this sale.");
         updateSummary();
     }
-     */
+     
 
     private int findRowByProductId(javax.swing.table.DefaultTableModel model, String productId) {
         for (int row = 0; row < model.getRowCount(); row++) {
