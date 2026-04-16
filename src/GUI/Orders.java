@@ -29,6 +29,8 @@ public class Orders extends javax.swing.JPanel {
     private SA_COMMS_API_Impl saCommsApi;
     private SA_LOGIN_API loginApi;
     private CustomerAPI_Impl customerApi;
+    private String selectedMerchantUsername = "cosymed";
+    private String selectedMerchantPassword = "bondstreet";
 
 public Orders() {
     initComponents();
@@ -38,18 +40,8 @@ public Orders() {
     loginApi = new SA_LOGIN_API();
     customerApi = new CustomerAPI_Impl();
 
-    boolean loggedIn = saCommsApi.login("cosymed", "bondstreet");
-    System.out.println("SA login result: " + loggedIn);
-
-    if (!loggedIn) {
-        javax.swing.JOptionPane.showMessageDialog(this, "Failed to log in to IPOS-SA.");
-        return;
-    }
-
-    loadOrders();
-    refreshStatusesFromSA();
-    loadCatalogue();
-    loadLoggedInBalance();
+    initialiseMerchantSelector();
+    loginSelectedMerchantAndRefresh();
 
     jCatalogueSearchBar.addKeyListener(new java.awt.event.KeyAdapter() {
         public void keyReleased(java.awt.event.KeyEvent evt) {
@@ -59,24 +51,8 @@ public Orders() {
 }
 
 
-    
-    /**
-     * Creates new form Orders
-     */
 
         
-        //THIS USES THE WRONG API
-        /*
-        orderApi = new CA_OnlineOrderAPI_Impl(
-        new sa_orders.SA_ORD_API(DBConnection.getConnection()),
-        new merchant.SA_Merchant_API_Impl(DBConnection.getConnection()), 
-        new stock.CA_Stock_API_Impl(DBConnection.getConnection()),
-        DBConnection.getConnection()
-        );
-        */
-        
-
-
     
     
     /**
@@ -110,6 +86,7 @@ public Orders() {
         jLabel5 = new javax.swing.JLabel();
         jButton2 = new javax.swing.JButton();
         btnPlaceOrder = new javax.swing.JButton();
+        jComboBox1 = new javax.swing.JComboBox<>();
 
         setBackground(new java.awt.Color(255, 255, 255));
 
@@ -332,6 +309,9 @@ public Orders() {
         btnPlaceOrder.setText("+ Place Order");
         btnPlaceOrder.addActionListener(this::btnPlaceOrderActionPerformed);
 
+        jComboBox1.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+        jComboBox1.addActionListener(this::jComboBox1ActionPerformed);
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
@@ -348,9 +328,15 @@ public Orders() {
                                     .addComponent(lbInfo1))
                                 .addGap(89, 89, 89)
                                 .addComponent(btnPlaceOrder, javax.swing.GroupLayout.PREFERRED_SIZE, 159, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                        .addGap(36, 36, 36)
-                        .addComponent(jButton2)
-                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(layout.createSequentialGroup()
+                                .addGap(36, 36, 36)
+                                .addComponent(jButton2)
+                                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(jComboBox1, javax.swing.GroupLayout.PREFERRED_SIZE, 127, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(116, 116, 116))))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                         .addComponent(jTabbedPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 980, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(55, 55, 55))))
@@ -371,7 +357,9 @@ public Orders() {
                             .addComponent(btnPlaceOrder, javax.swing.GroupLayout.PREFERRED_SIZE, 44, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 44, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addGap(29, 29, 29)))
-                .addComponent(jPanel6, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jPanel6, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jComboBox1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(36, 36, 36)
                 .addComponent(jTabbedPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 563, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(80, 80, 80))
@@ -435,7 +423,8 @@ private void loadCatalogue() {
             (javax.swing.table.DefaultTableModel) jCatalogueTable.getModel();
         model.setRowCount(0);
 
-String jsonResponse = saCommsApi.getActiveCatalogue("username=cosymed");
+
+String jsonResponse = saCommsApi.getActiveCatalogue("username=" + selectedMerchantUsername);
 System.out.println("RAW catalogue response: " + jsonResponse);
 
 if (jsonResponse == null || jsonResponse.isBlank()) {
@@ -465,7 +454,7 @@ private void searchCatalogue(String searchText) {
             (javax.swing.table.DefaultTableModel) jCatalogueTable.getModel();
         model.setRowCount(0);
 
-        String jsonResponse = saCommsApi.getActiveCatalogue("username=cosymed");
+        String jsonResponse = saCommsApi.getActiveCatalogue("username=" + selectedMerchantUsername);
 
         if (jsonResponse == null || jsonResponse.isBlank()) {
             return;
@@ -491,7 +480,8 @@ private void searchCatalogue(String searchText) {
     //code for balance
 private void loadLoggedInBalance() {
     try {
-        String response = saCommsApi.getBalance("username=cosymed");
+        
+        String response = saCommsApi.getBalance("username=" + selectedMerchantUsername);
         System.out.println("SA balance response: " + response);
 
         if (response == null || response.isBlank()) {
@@ -619,6 +609,12 @@ private void loadLoggedInBalance() {
     
 
     }//GEN-LAST:event_btnPlaceOrderActionPerformed
+
+    private void jComboBox1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jComboBox1ActionPerformed
+            if (saCommsApi != null) {
+        loginSelectedMerchantAndRefresh();
+    }    
+    }//GEN-LAST:event_jComboBox1ActionPerformed
 
 private Map<Integer, String> parseCatalogueResponse(String jsonResponse) {
     Map<Integer, String> result = new LinkedHashMap<>();
@@ -905,7 +901,51 @@ private String formatInvoiceResponse(String jsonResponse) {
     }
 }
 
+private void initialiseMerchantSelector() {
+    jComboBox1.removeAllItems();
+    jComboBox1.addItem("Cosymed Ltd");
+    jComboBox1.addItem("CityPharmacy");
+    jComboBox1.addItem("HelloPharmacy");
 
+    jComboBox1.setSelectedItem("Cosymed Ltd");
+}
+
+
+private void loginSelectedMerchantAndRefresh() {
+    try {
+        String selected = String.valueOf(jComboBox1.getSelectedItem());
+
+        if ("CityPharmacy".equals(selected)) {
+            selectedMerchantUsername = "city";
+            selectedMerchantPassword = "northampton";
+        } else if ("HelloPharmacy".equals(selected)) {
+            selectedMerchantUsername = "hello";
+            selectedMerchantPassword = "there";
+        } else {
+            selectedMerchantUsername = "cosymed";
+            selectedMerchantPassword = "bondstreet";
+        }
+
+        boolean loggedIn = saCommsApi.login(selectedMerchantUsername, selectedMerchantPassword);
+        System.out.println("SA login result for " + selectedMerchantUsername + ": " + loggedIn);
+
+        if (!loggedIn) {
+            javax.swing.JOptionPane.showMessageDialog(this,
+                "Failed to log in to IPOS-SA for " + selected);
+            return;
+        }
+
+        loadOrders();
+        refreshStatusesFromSA();
+        loadCatalogue();
+        loadLoggedInBalance();
+
+    } catch (Exception e) {
+        e.printStackTrace();
+        javax.swing.JOptionPane.showMessageDialog(this,
+            "Failed to switch merchant.");
+    }
+}
 
 
 
@@ -915,6 +955,7 @@ private String formatInvoiceResponse(String jsonResponse) {
     private javax.swing.JButton jButton2;
     private javax.swing.JTextField jCatalogueSearchBar;
     private javax.swing.JTable jCatalogueTable;
+    private javax.swing.JComboBox<String> jComboBox1;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
