@@ -114,7 +114,7 @@ public class MockSubsystemCA {
     }
 
     private static List<Map<String, Object>> readCatalogue(Connection conn, String search) {
-        String sql = "SELECT CAST(p.product_id AS TEXT) AS item_id, p.product_name, COALESCE(p.description, '') AS description, "
+        String sql = "SELECT CAST(p.product_id AS TEXT) AS item_id, "
                 + "p.price, COALESCE(s.quantity, 0) AS stock_level, COALESCE(p.product_type, '') AS category "
                 + "FROM ca_products p LEFT JOIN ca_stock s ON s.product_id = p.product_id "
                 + "WHERE LOWER(p.product_name) LIKE ? OR LOWER(COALESCE(p.product_type, '')) LIKE ? "
@@ -134,7 +134,7 @@ public class MockSubsystemCA {
                     Map<String, Object> row = new LinkedHashMap<>();
                     row.put("item_id", rs.getString("item_id"));
                     row.put("product_name", rs.getString("product_name"));
-                    row.put("description", rs.getString("description"));
+                    row.put("description", "");
                     row.put("price", rs.getDouble("price"));
                     row.put("stock_level", rs.getInt("stock_level"));
                     row.put("category", rs.getString("category"));
