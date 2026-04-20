@@ -7,9 +7,6 @@
 package GUI;
 
 
-
-
-
 /**
  *
  * @author mehzanazkhan
